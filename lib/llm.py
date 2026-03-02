@@ -17,9 +17,13 @@ class LLM:
             base_url=_base_url,
         )
         self.prompt = ""
+        self.role = "你是一个资深的金融数据分析师。根据以下 MySQL 表结构，\
+                     将用户的自然语言问题转化为 SQL 查询语句。\
+                     不要输出任何解释，只能输出纯 SQL 语句！"
+
         self.model = "qwen3.5-flash"
         self.message: list = [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": self.role},
             {"role": "user", "content": self.prompt},
         ]
 
