@@ -1,8 +1,8 @@
 from langchain_community.vectorstores import Chroma
+from langchain_core.example_selectors import SemanticSimilarityExampleSelector
 from langchain_core.prompts import (
     FewShotPromptTemplate,
     PromptTemplate,
-    SemanticSimilarityExampleSelector,
 )
 from langchain_huggingface import HuggingFaceEmbeddings
 

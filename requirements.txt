@@ -85,7 +85,7 @@ opentelemetry-semantic-conventions==0.60b1
 orjson==3.11.7
 ormsgpack==1.12.2
 overrides==7.7.0
-packaging @ file:///opt/miniconda3/conda-bld/packaging_1761049079066/work
+packaging
 pandas==3.0.1
 pdfminer.six==20251230
 pdfplumber==0.11.9

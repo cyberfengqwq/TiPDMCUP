@@ -22,15 +22,17 @@ class LLM:
                      不要输出任何解释，只能输出纯 SQL 语句！"
 
         self.model = "qwen3.5-flash"
-        self.message: list = [
+
+    def chat(self, prompt: str) -> str:
+        message: list = [
             {"role": "system", "content": self.role},
             {"role": "user", "content": self.prompt},
         ]
-
-    def chat(self, prompt: str) -> str:
         self.prompt = prompt
         completion = self.client.chat.completions.create(
-            model=self.model, messages=self.message
+            model=self.model,
+            messages=message,
+            temperature=0.01,
         )
         return str(completion.choices[0].message.content)
 
