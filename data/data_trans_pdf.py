@@ -54,7 +54,24 @@ class TransPDF:
                         if table:
                             df = pd.DataFrame(table)
                             self._raw_tables.append(table)
-                    
+                            
+        def _identify_target_tables(self):
+            """
+            功能：根据关键字识别目标数据
+            """
+            annual_df, quarter_df = None, None
+            
+            for df in self._raw_dfs:
+                # 初步去掉表格前 5 行的 "/n" 和 " ", 方便接下来的识别
+                head_str = df.head(10).to_string().replace('\n', '').replace(' ', '')
+
+                # 识别年度表和季度表
+                if ("总资产" in head_str and "营业收入" in head_str) or "本年比上年" in head_str:
+                    annual_df = df
+                elif any(q in head_str for q in ['一季度', '第一季度', 'Q1']):
+                    quarter_df = df
+        
+            return annual_df, quarter_df
         
         
         
