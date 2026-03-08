@@ -43,8 +43,8 @@ class TransPDF:
     # 内部私有方法
     def _extract_all_tables(self):
         """
-        功能(1)：从 PDF 中提取所有表格为Datarame
-                并放在 "生"表格 列表当中
+        1. 从 PDF 中提取所有表格为Datarame，
+           并放在 "生"表格 列表当中
         """
         self._raw_tables = []
         with pdfplumber.open(self.file_path) as pdf:
@@ -58,12 +58,12 @@ class TransPDF:
 
     def _identify_target_tables(self):
         """
-        功能(2)：根据关键字识别目标数据
+        2. 根据关键字识别目标数据
         """
         annual_df, quarter_df = None, None
         
         for df in self._raw_dfs:
-            # 初步去掉表格前 5 行的 "/n" 和 " ", 方便接下来的识别
+            # 初步去掉表格前 10 行的 "/n" 和 " ", 方便接下来的识别
             head_str = df.head(10).to_string().replace('\n', '').replace(' ', '')
 
             # 识别年度表和季度表
@@ -73,18 +73,31 @@ class TransPDF:
                 quarter_df = df
     
         return annual_df, quarter_df
+    
+    def _clean_and_format(self, df):
+        """
+        3. 清洗 DataFrame : 处理表头、换行符、数字‘，’
+        """
+        df_clean: pd.DataFrame = df.copy()
         
         
-        
-        
-        
-        def process(self):
-            """
-            执行全套 PDF 转换流程：
-            提取 -> 识别 -> 清洗 -> 合并 -> 分类
-            """
-            print(f"正在处理：{self.source_filename}")
-            self._extract_all_tables()
+    
+    def _merge_and_split(self, annual_df, quater_df):
+        """
+        4. 合并表格，打上来源标签，分配到四个空的主要目标 DataFrame 中
+        """
+    
+    
+    
+    
+    
+    def process(self):
+        """
+        执行全套 PDF 转换流程：
+        提取 -> 识别 -> 清洗 -> 合并 & 分类
+        """
+        print(f"正在处理：{self.source_filename}")
+        self._extract_all_tables()
             
             
     # （3）打印清洗后的 DataFrame
