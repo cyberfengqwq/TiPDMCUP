@@ -43,7 +43,7 @@ class TransPDF:
         # 内部私有方法
         def _extract_all_tables(self):
             """
-            功能：从 PDF 中提取所有表格为Datarame
+            功能(1)：从 PDF 中提取所有表格为Datarame
                  并放在 "生"表格 列表当中
             """
             self._raw_tables = []
@@ -57,7 +57,7 @@ class TransPDF:
                             
         def _identify_target_tables(self):
             """
-            功能：根据关键字识别目标数据
+            功能(2)：根据关键字识别目标数据
             """
             annual_df, quarter_df = None, None
             
@@ -85,29 +85,6 @@ class TransPDF:
             print(f"正在处理：{self.source_filename}")
             self._extract_all_tables()
             
-            
-        
-        
-        
-
-    # （1）将 PDF 中的表格转化为 DataFrame 格式
-    def trans_pdf(self, file_path: str) -> list[pd.DataFrame]:
-        with pdfplumber.open(file_path) as pdf:
-            pages: list = pdf.pages
-
-            for page in pages:
-                table = page.extract_table()
-
-                if table:
-                    df: pd.DataFrame = pd.DataFrame(table)
-                    self.raw_tables.append(df)
-
-        return self.raw_tables
-
-    # （2）根据关键词清洗 DataFrame
-    def clean_format_pdf(self, file_path: str):
-        for table in self.raw_tables:
-            clean_table: pd.DataFrame = table
             
     # （3）打印清洗后的 DataFrame
     def print_tables(self) -> None:
