@@ -98,20 +98,6 @@ class TransPDF:
         """
         print(f"正在处理：{self.source_filename}")
         self._extract_all_tables()
-            
-            
-    # （3）打印清洗后的 DataFrame
-    def print_tables(self) -> None:
-        count: int = 1
-
-        if self.raw_tables:
-            for table in self.raw_tables:
-                print(f"第{count}个表格")
-                print(table)
-
-                count += 1
-        else:
-            print("没有表格！！")
 
 
 def main() -> None:
