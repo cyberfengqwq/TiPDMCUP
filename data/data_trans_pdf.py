@@ -119,6 +119,7 @@ class TransPDF:
         """
         print(f"正在处理：{self.source_filename}")
         self._extract_all_tables()
+<<<<<<< HEAD
         self._extract_all_tables()
 
     # （3）打印清洗后的 DataFrame
@@ -133,6 +134,8 @@ class TransPDF:
                 count += 1
         else:
             print("没有表格！！")
+=======
+>>>>>>> 9757dd9bf027b54bcdd3a6b46fb7b2dce3d5970d
 
 
 def main() -> None:
