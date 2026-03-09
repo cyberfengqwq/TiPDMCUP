@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from lib.llm import LLM
+from core.llm import LLM
 
 app = FastAPI(title="ticup")
 
@@ -18,5 +18,4 @@ async def chat_endpoint(request: ChatRequest):
 
 
 def run_app() -> None:
-
     uvicorn.run(app, host="0.0.0.0", port=1515)

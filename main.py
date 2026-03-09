@@ -1,4 +1,4 @@
-import src.webAPI
+import web.webAPI
 
 if __name__ == "__main__":
-    src.webAPI.run_app()
+    web.webAPI.run_app()
