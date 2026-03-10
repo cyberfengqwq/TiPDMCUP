@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from core.llm import LLM
+from agent.pipeline import Agent
 
 app = FastAPI(title="ticup")
 
@@ -13,8 +13,8 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    llm: LLM = LLM()
-    return llm.chat(request.prompt)
+    agent = Agent()
+    return agent.run_pipeline(request.prompt)
 
 
 def run_app() -> None:
