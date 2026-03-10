@@ -48,7 +48,7 @@ class TransPDF:
     # 核心成员函数
     def extract_all_tables(self, file_path: Path) -> None:
         """
-        1. 从 PDF 中提取所有表格为Datarame，
+        1. 从 PDF 中提取所有表格为Datarame,
            并放在 "生"表格 列表当中
         """
         with pdfplumber.open(file_path) as pdf:
@@ -64,7 +64,7 @@ class TransPDF:
         """
 
         for df in self.table.raw_tables:
-            # 初步去掉表格前 10 行的 "/n" 和 " ", 方便接下来的识别
+            # 初步去掉表格中的 "/n" 和 " ", 方便接下来的识别
             head_str = df.head(len(df)).to_string().replace("\n", "").replace(" ", "")
 
             # 识别年度表和季度表
@@ -98,7 +98,7 @@ class TransPDF:
         self.extract_all_tables(file_path)
         self.identify_target_tables()
 
-    # （3）打印清洗后的 DataFrame
+    # 打印清洗后的 DataFrame
     def print_tables(self) -> None:
         count: int = 1
 
