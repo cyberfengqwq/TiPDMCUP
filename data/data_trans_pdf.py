@@ -1,5 +1,5 @@
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import pandas as pd
 import pdfplumber
@@ -7,39 +7,49 @@ import pdfplumber
 
 @dataclass
 class DF:
-    '''
+    """
     初始化一系列目标 DataFrame
-    '''
+    """
+
     annual_dfs: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame])
     quarter_dfs: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame])
-    
+
     processed_dfs: list[list[pd.DataFrame]] = field(
         default_factory=list[list[pd.DataFrame]]
     )
-    
-    core_performance_indicators_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 业绩指标pd
-    balance_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)                      # 资产负债pd
-    income_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)                       # 利润pd
-    cash_flow_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)                    # 现金流pd
-    
+
+    core_performance_indicators_sheet: pd.DataFrame = field(
+        default_factory=pd.DataFrame
+    )  # 业绩指标pd
+    balance_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 资产负债pd
+    income_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 利润pd
+    cash_flow_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 现金流pd
+
     def __post_init__(self) -> None:
         if not self.process_dfs:
             self.process_dfs = [self.annual_dfs, self.quarter_dfs]
-            
+
+
 @dataclass
 class Table:
-    '''
+    """
     初始化处理过程中的表格
-    '''
-    raw_tables: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame]) #"生"表格
-    tables_all: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame]) #"熟"表格
+    """
+
+    raw_tables: list[pd.DataFrame] = field(
+        default_factory=list[pd.DataFrame]
+    )  # "生"表格
+    tables_all: list[pd.DataFrame] = field(
+        default_factory=list[pd.DataFrame]
+    )  # "熟"表格
+
 
 class TransPDF:
     def __init__(self) -> None:
         # 初始化 dataclasses
         self.df = DF()
         self.table = Table()
-        
+
     # 核心成员函数
     def extract_all_tables(self, file_path: Path) -> None:
         """1. 从 PDF 中提取所有表格为Datarame,
@@ -50,24 +60,21 @@ class TransPDF:
         """
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
-                tables: list[list] = page.extract_table()
+                tables: list[list] | None = page.extract_table()
+                assert tables is not None
                 for table in tables:
                     if table:
                         self.table.raw_tables.append(pd.DataFrame(table))
 
-    def _identify_target_tables(
-        self,
-    ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
-        """2. 根据关键字识别目标数据
-
-        Returns:
-            tuple[pd.DataFrame | None, pd.DataFrame | None]: 返回一个元组
+    def identify_target_tables(self) -> None:
         """
-        
+        2. 根据关键字识别目标数据
+        """
+
         for df in self.table.raw_tables:
             # 初步清洗表格中的 "/n" 和 " ", 方便接下来的识别
             head_str = df.head(len(df)).to_string().replace("/n", "").replace(" ", "")
-            
+
             # 识别年度表和季度表
             if (
                 "总资产" in head_str and "营业收入" in head_str
@@ -83,7 +90,6 @@ class TransPDF:
         for dfs in self.df.processed_dfs:
             for df in dfs:
                 df_clean: pd.DataFrame = df.copy()
-                
 
     def _merge_and_split(self, annual_df, quater_df):
         """
