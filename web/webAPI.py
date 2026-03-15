@@ -1,7 +1,5 @@
 # web/webAPI.py
 
-from dataclasses import dataclass
-from threading import Thread
 
 import uvicorn
 from fastapi import FastAPI
@@ -11,9 +9,12 @@ from agent.pipeline import Agent
 
 app = FastAPI(title="ticup")
 
+sessions: dict[str, Agent] = {}
+
 
 class ChatRequest(BaseModel):
     prompt: str
+    session_id: str
 
 
 agent = Agent()

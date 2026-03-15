@@ -1,15 +1,95 @@
 # config/db_schema.py
 
-# 1. 数据库表结构
-TABLE_SCHEMA = """
-【数据库表结构说明】
-表名: income_sheet (利润表)
-字段:
-- stock_abbr (VARCHAR): 股票简称，如 '金花股份', '华润三九'
-- report_period (VARCHAR): 报告期，如 '2024FY' (2024年度), '2025Q3' (2025年第三季度)
-- total_profit (DECIMAL): 利润总额(万元)
-- total_revenue (DECIMAL): 营业总收入(万元)
-"""
+DATABASE_SCHEMA_DICT: dict[str, dict[str, str]] = {
+    "core_performance_indicators_sheet": {
+        "serial_number": "序号",
+        "stock_code": "股票代码",
+        "stock_abbr": "股票简称",
+        "eps": "每股收益（元）",
+        "total_operating_revenue": "营业总收入（万元）",
+        "operating_revenue_yoy_growth": "营业总收入-同比增长(%)",
+        "operating_revenue_qoq_growth": "营业总收入-季度环比增长(%)",
+        "net_profit_10k_yuan": "净利润(万元)",
+        "net_prof it_yoy_growth": "净利润-同比增长(%)",
+        "net_profit_qoq_growth": "净利润-季度环比增长(%)",
+        "net_asset_per_share": "每股净资产(元)",
+        "roe": "净资产收益率(%)",
+        "operating_cf_per_share": "每股经营现金流量(元)",
+        "net_profit_excl_non_recurring": "扣非净利润（万元）",
+        "net_profit_excl_non_recurring_yoy": "扣非净利润同比增长（%）",
+        "gross_profit_margin": "销售毛利率(%)",
+        "net_profit_margin": "销售净利率（%）",
+        "roe_weighted_excl_non_recurring": "加权平均净资产收益率（扣非）（%）",
+        "report_period": "报告期",
+        "report_year": "报告期-年份",
+    },
+    "balance_sheet": {
+        "serial_number": "序号",
+        "stock_code": "股票代码",
+        "stock_abbr": "股票简称",
+        "asset_cash_and_cash_equivalents": "资产-货币资金(万元)",
+        "asset_accounts_receivable": "资产-应收账款(万元)",
+        "asset_inventory": "资产-存货(万元)",
+        "asset_trading_financial_assets": "资产-交易性金融资产（万元）",
+        "asset_construction_in_progress": "资产-在建工程（万元）",
+        "asset_total_assets": "资产-总资产(万元)",
+        "asset_total_assets_yoy_growth": "资产-总资产同比(%)",
+        "liability_accounts_payable": "负债-应付账款(万元)",
+        "liability_advance_from_customers": "负债-预收账款(万元)",
+        "liability_total_liabilities": "负债-总负债(万元)",
+        "liability_total_liabilities_yoy_growth": "负债-总负债同比(%)",
+        "liability_contract_liabilities": "负债-合同负债（万元）",
+        "liability_short_term_loans": "负债-短期借款（万元）",
+        "asset_liability_ratio": "资产负债率(%)",
+        "equity_unappropriated_profit": "股东权益-未分配利润（万元）",
+        "equity_total_equity": "股东权益合计(万元)",
+        "report_period": "报告期",
+        "report_year": "报告期-年份",
+    },
+    "income_sheet": {
+        "serial_number": "序号",
+        "stock_code": "股票代码",
+        "stock_abbr": "股票简称",
+        "net_profit": "净利润(万元)",
+        "net_profit_yoy_growth": "净利润同比(%)",
+        "other_income": "其他收益（万元）",
+        "total_operating_revenue": "营业总收入(万元)",
+        "operating_revenue_yoy_growth": "营业总收入同比(%)",
+        "operating_expense_cost_of_sales": "营业总支出-营业支出(万元)",
+        "operating_expense_selling_expenses": "营业总支出-销售费用(万元)",
+        "operating_expense_administrative_expenses": "营业总支出-管理费用(万元)",
+        "operating_expense_financial_expenses": "营业总支出-财务费用(万元)",
+        "operating_expense_rnd_expenses": "营业总支出-研发费用（万元）",
+        "operating_expense_taxes_and_surcharges": "营业总支出-税金及附加（万元）",
+        "total_operating_expenses": "营业总支出(万元)",
+        "operating_profit": "营业利润(万元)",
+        "total_profit": "利润总额(万元)",
+        "asset_impairment_loss": "资产减值损失（万元）",
+        "credit_impairment_loss": "信用减值损失（万元）",
+        "report_period": "报告期",
+        "report_year": "报告期-年份",
+    },
+    "cash_flow_sheet": {
+        "serial_number": "序号",
+        "stock_code": "股票代码",
+        "stock_abbr": "股票简称",
+        "net_cash_flow": "净现金流(元)",
+        "net_cash_flow_yoy_growth": "净现金流-同比增长(%)",
+        "operating_cf_net_amount": "经营性现金流-现金流量净额(万元)",
+        "operating_cf_ratio_of_net_cf": "经营性现金流-净现金流占比(%)",
+        "operating_cf_cash_from_sales": "经营性现金流-销售商品收到的现金（万元）",
+        "investing_cf_net_amount": "投资性现金流-现金流量净额(万元)",
+        "investing_cf_ratio_of_net_cf": "投资性现金流-净现金流占比(%)",
+        "investing_cf_cash_for_investments": "投资性现金流-投资支付的现金（万元）",
+        "investing_cf_cash_from_investment_recovery": "投资性现金流-收回投资收到的现金（万元）",
+        "financing_cf_cash_from_borrowing": "融资性现金流-取得借款收到的现金（万元）",
+        "financing_cf_cash_for_debt_repayment": "融资性现金流-偿还债务支付的现金（万元）",
+        "financing_cf_net_amount": "融资性现金流-现金流量净额(万元)",
+        "financing_cf_ratio_of_net_cf": "融资性现金流-净现金流占比(%)",
+        "report_period": "报告期",
+        "report_year": "报告期-年份",
+    },
+}
 
 # 2. SQL 样例
 SQL_EXAMPLES = [
