@@ -37,7 +37,7 @@ class LLM:
         ]
         completion = self.client.chat.completions.create(
             model=self.model,
-            messages=message,`
+            messages=message,
             temperature=0.01,
         )
         return str(completion.choices[0].message.content)
