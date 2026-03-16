@@ -12,17 +12,22 @@ app = FastAPI(title="ticup")
 sessions: dict[str, Agent] = {}
 
 
+def get_or_create_session(session_id: str) -> Agent:
+    if session_id not in sessions:
+        sessions[session_id] = Agent(session_id)
+    return sessions[session_id]
+
+
 class ChatRequest(BaseModel):
     prompt: str
     session_id: str
 
 
-agent = Agent()
-
-
 @app.post("/chat")
 def chat_endpoint(request: ChatRequest) -> str:
-    return agent.run_pipeline(request.prompt)
+    user_agent: Agent = get_or_create_session(request.session_id)
+
+    return user_agent.
 
 
 def run_app() -> None:
