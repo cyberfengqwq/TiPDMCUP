@@ -1,6 +1,7 @@
 # rag/sql_retriever.py
 
 import logging
+import threading
 
 # from FlagEmbedding import BGEM3FlagModel
 from pathlib import Path
@@ -43,8 +44,8 @@ class Retrieval:
         self.meta: List[Dict] = []
 
         # 初始化流程
-        self._get_persist_paths()
-        self._load_or_init_index()
+        self.get_persist_paths()
+        self.load_or_init_index()
 
     # =============通用操作==============
     def encode_text(self, texts: List[str]) -> np.ndarray:
@@ -60,15 +61,29 @@ class Retrieval:
             logging.warning("数据为空")
             return
 
-        self.meta = data
-        texts = [item["text"] for item in data]
-        embeddings = self.encode_text(texts)
-        self.index = faiss.IndexFlatL2(self.dimension)
-        self.index.add(embeddings)
-        logging.info(f"索引构建完成，共{len(data)}条数据")
+        if hasattr(self, "_lock"):
+            with self._lock:
+                self.meta = data
+                texts = [item["text"] for item in data]
+                embeddings = self.encode_text(texts)
+                self.index = faiss.IndexFlatL2(self.dimension)
+                self.index.add(embeddings)
+                logging.info(f"索引构建完成，共{len(data)}条数据")
+        else:
+            self.meta = data
+            texts = [item["text"] for item in data]
+            embeddings = self.encode_text(texts)
+            self.index = faiss.IndexFlatL2(self.dimension)
+            self.index.add(embeddings)
+            logging.info(f"索引构建完成，共{len(data)}条数据")
 
     def search(self, query: str, top_k: int = 5) -> List[Dict]:
-        """搜索最相似的内容"""
+        """
+        搜索最相似的内容
+        返回：results：[
+            “对应的key”：“对应的value”
+        ]
+        """
         if self.index is None:
             logging.warning("索引未初始化")
             return []
@@ -80,9 +95,7 @@ class Retrieval:
         for i, idx in enumerate(indices[0]):
             if idx < len(self.meta):
                 result = self.meta[idx].copy()
-                result["distance"] = float(distances[0][i])
                 results.append(result)
-        
         return results
 
     def save_index(self):
@@ -90,21 +103,33 @@ class Retrieval:
         if self.index_path is None or self.meta_path is None:
             return
         
-        if self.index is not None:
-            faiss.write_index(self.index, str(self.index_path))
-        
-        if self.meta:
-            import json
-            with open(self.meta_path, "w", encoding="utf-8") as f:
-                json.dump(self.meta, f, ensure_ascii=False, indent=2)
-        
-        logging.info(f"索引已保存到 {self.index_path}")
+        if hasattr(self, "_lock"):
+            with self._lock:
+                if self.index is not None:
+                    faiss.write_index(self.index, str(self.index_path))
+                
+                if self.meta:
+                    import json
+                    with open(self.meta_path, "w", encoding="utf-8") as f:
+                        json.dump(self.meta, f, ensure_ascii=False, indent=2)
+                
+                logging.info(f"索引已保存到 {self.index_path}")
+        else:
+            if self.index is not None:
+                faiss.write_index(self.index, str(self.index_path))
+            
+            if self.meta:
+                import json
+                with open(self.meta_path, "w", encoding="utf-8") as f:
+                    json.dump(self.meta, f, ensure_ascii=False, indent=2)
+            
+            logging.info(f"索引已保存到 {self.index_path}")
 
-    def _get_persist_paths(self):
+    def get_persist_paths(self):
         """子类需要实现此方法来设置索引和元数据的保存路径"""
         pass
 
-    def _load_or_init_index(self):
+    def load_or_init_index(self):
         """加载已存在的索引或初始化新索引"""
         if self.index_path is None or self.meta_path is None:
             return
@@ -124,14 +149,15 @@ class Retrieval:
 
 
 class UserRetrieval(Retrieval):
-    def __init__(self, model_name: str = "BAAI/bge-m3-finance", persist_root: str = "./faiss_global", user: str = ""):
+    def __init__(self, model_name: str = "BAAI/bge-m3-finance", persist_root: str = "./faiss_store", user: str = ""):
         if hasattr(self, "index_path"):
             return
         self.user = user
+        self._lock = threading.Lock()
         super().__init__(model_name=model_name, persist_root=persist_root)
-        self._load_user_history()
+        self.load_user_history()
     
-    def _get_persist_paths(self):
+    def get_persist_paths(self):
         """设置用户历史问题的索引和元数据保存路径"""
         if self.user:
             user_dir = self.persist_root / self.user
@@ -142,7 +168,7 @@ class UserRetrieval(Retrieval):
             self.index_path = self.persist_root / "user_index.faiss"
             self.meta_path = self.persist_root / "user_meta.json"
     
-    def _load_user_history(self):
+    def load_user_history(self):
         """从 config 目录加载用户历史问题和 SQL_EXAMPLES"""
         if self.index is not None and len(self.meta) > 0:
             return
@@ -184,19 +210,20 @@ class UserRetrieval(Retrieval):
     
     def add_user_question(self, question: str, sql: str):
         """添加用户问题和对应的SQL到索引中"""
-        if not hasattr(self, "index") or self.index is None:
-            self.index = faiss.IndexFlatL2(self.dimension)
-        
-        item = {
-            "text": question,
-            "sql": sql,
-            "type": "user_question"
-        }
-        self.meta.append(item)
-        
-        embedding = self.encode_text([question])
-        self.index.add(embedding)
-        logging.info(f"已添加用户问题: {question[:50]}...")
+        with self._lock:
+            if not hasattr(self, "index") or self.index is None:
+                self.index = faiss.IndexFlatL2(self.dimension)
+            
+            item = {
+                "text": question,
+                "sql": sql,
+                "type": "user_question"
+            }
+            self.meta.append(item)
+            
+            embedding = self.encode_text([question])
+            self.index.add(embedding)
+            logging.info(f"已添加用户问题: {question[:50]}...")
     
     def search_similar_questions(self, query: str, top_k: int = 3) -> List[Dict]:
         """搜索相似的历史问题"""
@@ -208,14 +235,14 @@ class FieldDataRetrieval(Retrieval):
         if hasattr(self, "index_path"):
             return
         super().__init__(model_name=model_name, persist_root=persist_root)
-        self._init_field_index()
+        self.init_field_index()
     
-    def _get_persist_paths(self):
+    def get_persist_paths(self):
         """设置字段信息的索引和元数据保存路径"""
         self.index_path = self.persist_root / "field_index.faiss"
         self.meta_path = self.persist_root / "field_meta.json"
     
-    def _init_field_index(self):
+    def init_field_index(self):
         """初始化数据库字段索引"""
         if self.index is not None and len(self.meta) > 0:
             return
@@ -247,8 +274,9 @@ class FieldDataRetrieval(Retrieval):
 class DualRetrieval:
     """双重检索器：同时检索用户历史问题和数据库字段信息"""
     
-    _shared_field_retrieval: Optional["FieldDataRetrieval"] = None
-    _field_store_path = "./faiss_field_store"
+    shared_field_retrieval: Optional["FieldDataRetrieval"] = None
+    field_store_path = "./faiss_field_store"
+    _lock = threading.Lock()
     
     def __init__(
         self,
@@ -267,13 +295,14 @@ class DualRetrieval:
             user=user
         )
         
-        if DualRetrieval._shared_field_retrieval is None:
-            DualRetrieval._shared_field_retrieval = FieldDataRetrieval(
-                model_name=model_name,
-                persist_root=DualRetrieval._field_store_path
-            )
+        with DualRetrieval._lock:
+            if DualRetrieval.shared_field_retrieval is None:
+                DualRetrieval.shared_field_retrieval = FieldDataRetrieval(
+                    model_name=model_name,
+                    persist_root=DualRetrieval.field_store_path
+                )
         
-        self.field_retrieval = DualRetrieval._shared_field_retrieval
+        self.field_retrieval = DualRetrieval.shared_field_retrieval
     
     def retrieve(self, query: str, top_k_questions: int = 3, top_k_fields: int = 5) -> Dict:
         """执行双重检索：返回相似问题和相关字段"""
