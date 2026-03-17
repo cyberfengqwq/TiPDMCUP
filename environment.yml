@@ -1,0 +1,40 @@
+name: ticup
+channels:
+  # 优先从 conda-forge 获取最新的社区包
+  - conda-forge
+  # 用于获取官方的 PyTorch 和 Faiss
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.11
+
+  # 1. 深度学习与向量检索 (macOS 环境使用 cpu 版本，PyTorch 会自动支持 MPS 加速)
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::faiss-cpu
+
+  # 2. NLP 与大模型框架
+  - transformers
+  - sentence-transformers
+  - langchain
+  - langchain-community
+  - langchain-core
+  - langchain-openai
+  - langchain-huggingface
+  - langgraph
+
+  # 3. Web 后端服务端
+  - fastapi
+  - uvicorn
+  - pydantic
+
+  # 4. 数据处理与数据库
+  - numpy<2
+  - pandas
+  - sqlalchemy
+  - pymysql
+  - pypika
+
+  # 5. 其他工具包 (如有极个别 conda 没有的包，才在此处用 pip 补充)
+  - pip:
+      - pyecharts

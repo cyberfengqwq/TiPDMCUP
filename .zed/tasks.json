@@ -1,7 +1,7 @@
 [
   {
     "label": "Run Python file",
-    "command": "conda init && conda activate ticup && python3 \"$ZED_FILE\"",
+    "command": "conda init && conda activate ticup && python \"$ZED_FILE\"",
     "use_new_terminal": false,
     "allow_concurrent_runs": false,
     "reveal": "always",

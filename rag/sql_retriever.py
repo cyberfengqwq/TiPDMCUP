@@ -26,7 +26,7 @@ class Retrieval:
 
     def __init__(
         self,
-        model_name: str = "BAAI/bge-m3-finance",
+        model_name: str = "BAAI/bge-m3",
         dimension: int = 1024,
         persist_root: str | Path = "./faiss_store",
     ) -> None:
@@ -155,7 +155,7 @@ class Retrieval:
 class UserRetrieval(Retrieval):
     def __init__(
         self,
-        model_name: str = "BAAI/bge-m3-finance",
+        model_name: str = "BAAI/bge-m3",
         persist_root: str = "./faiss_store",
         user: str = "",
     ):
@@ -246,7 +246,7 @@ class UserRetrieval(Retrieval):
 class FieldDataRetrieval(Retrieval):
     def __init__(
         self,
-        model_name: str = "BAAI/bge-m3-finance",
+        model_name: str = "BAAI/bge-m3",
         persist_root: str = "./faiss_global",
     ):
         if hasattr(self, "index_path"):
@@ -299,7 +299,7 @@ class DualRetrieval:
 
     def __init__(
         self,
-        model_name: str = "BAAI/bge-m3-finance",
+        model_name: str = "BAAI/bge-m3",
         persist_root: str | Path = "./faiss_dual_store",
         user: str = "",
     ):
