@@ -25,7 +25,6 @@ class Retrieval:
         self,
         model_name: str = "BAAI/bge-m3-finance",
         dimension: int = 1024,
-        user: str = "",
         persist_root: str | Path = "./faiss_store",
     ) -> None:
         # 初始化模型与参数
