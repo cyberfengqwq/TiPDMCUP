@@ -38,3 +38,4 @@ dependencies:
   # 5. 其他工具包 (如有极个别 conda 没有的包，才在此处用 pip 补充)
   - pip:
       - pyecharts
+      - pdfplumber

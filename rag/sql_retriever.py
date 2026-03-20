@@ -49,7 +49,6 @@ class Retrieval:
         self.get_persist_paths()
         self.load_or_init_index()
 
-    # =============通用操作==============
     def encode_text(self, texts: List[str]) -> np.ndarray:
         """将文本编码为向量"""
         embeddings = self.embedding.embed_documents(texts)

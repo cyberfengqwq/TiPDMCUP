@@ -1,20 +1,19 @@
 # web/webAPI.py
 
-
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from agent.pipeline import Agent
+from agent.pipeline import SQLRAGPipeline
 
 app = FastAPI(title="ticup")
 
-sessions: dict[str, Agent] = {}
+sessions: dict[str, SQLRAGPipeline] = {}
 
 
-def get_or_create_session(session_id: str) -> Agent:
+def get_or_create_session(session_id: str) -> SQLRAGPipeline:
     if session_id not in sessions:
-        sessions[session_id] = Agent(session_id)
+        sessions[session_id] = SQLRAGPipeline(session_id)
     return sessions[session_id]
 
 
@@ -25,9 +24,9 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 def chat_endpoint(request: ChatRequest) -> str:
-    user_agent: Agent = get_or_create_session(request.session_id)
+    user_agent: SQLRAGPipeline = get_or_create_session(request.session_id)
 
-    return user_agent.
+    return user_agent.run(request.prompt)
 
 
 def run_app() -> None:
