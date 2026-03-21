@@ -35,6 +35,8 @@ class Retrieval:
         self.embedding = HuggingFaceEmbeddings(model_name=model_name)
         self.dimension = dimension
 
+        self._lock: Optional[threading.Lock] = None
+
         # 构造目录
         self.persist_root = Path(persist_root)
         self.persist_root.mkdir(parents=True, exist_ok=True)
@@ -62,20 +64,20 @@ class Retrieval:
             logging.warning("数据为空")
             return
 
-        if hasattr(self, "_lock"):
+        if self._lock is not None:
             with self._lock:
                 self.meta = data
                 texts = [item["text"] for item in data]
                 embeddings = self.encode_text(texts)
                 self.index = faiss.IndexFlatL2(self.dimension)
-                self.index.add(embeddings)
+                self.index.add(embeddings)  # type: ignore
                 logging.info(f"索引构建完成，共{len(data)}条数据")
         else:
             self.meta = data
             texts = [item["text"] for item in data]
             embeddings = self.encode_text(texts)
             self.index = faiss.IndexFlatL2(self.dimension)
-            self.index.add(embeddings)
+            self.index.add(embeddings)  # type: ignore
             logging.info(f"索引构建完成，共{len(data)}条数据")
 
     def search(self, query: str, top_k: int = 5) -> List[Dict]:
@@ -89,13 +91,22 @@ class Retrieval:
             logging.warning("索引未初始化")
             return []
 
+        logger.info(
+            f"[Retrieval.search] query={query!r}, top_k={top_k}, meta_size={len(self.meta)}"
+        )
         query_embedding = self.encode_text([query])
-        distances, indices = self.index.search(query_embedding, top_k)
+        distances, indices = self.index.search(query_embedding, top_k)  # type: ignore
 
         results = []
-        for i, idx in enumerate(indices[0]):
+        for rank, idx in enumerate(indices[0]):
             if idx < len(self.meta):
                 result = self.meta[idx].copy()
+                result["rank"] = rank + 1
+                result["score"] = float(distances[0][rank])
+                result["meta_index"] = int(idx)
+                logger.info(
+                    f"[Retrieval.search] hit rank={rank + 1}, idx={idx}, score={distances[0][rank]:.6f}, text={result.get('text', '')[:80]}"
+                )
                 results.append(result)
         return results
 
@@ -104,7 +115,7 @@ class Retrieval:
         if self.index_path is None or self.meta_path is None:
             return
 
-        if hasattr(self, "_lock"):
+        if self._lock is not None:
             with self._lock:
                 if self.index is not None:
                     faiss.write_index(self.index, str(self.index_path))
@@ -226,16 +237,17 @@ class UserRetrieval(Retrieval):
 
     def add_user_question(self, question: str, sql: str):
         """添加用户问题和对应的SQL到索引中"""
-        with self._lock:
-            if not hasattr(self, "index") or self.index is None:
-                self.index = faiss.IndexFlatL2(self.dimension)
+        if self._lock is not None:
+            with self._lock:
+                if not hasattr(self, "index") or self.index is None:
+                    self.index = faiss.IndexFlatL2(self.dimension)
 
-            item = {"text": question, "sql": sql, "type": "user_question"}
-            self.meta.append(item)
+                item = {"text": question, "sql": sql, "type": "user_question"}
+                self.meta.append(item)
 
-            embedding = self.encode_text([question])
-            self.index.add(embedding)
-            logging.info(f"已添加用户问题: {question[:50]}...")
+                embedding = self.encode_text([question])
+                self.index.add(embedding)  # type: ignore
+                logging.info(f"已添加用户问题: {question[:50]}...")
 
     def search_similar_questions(self, query: str, top_k: int = 3) -> List[Dict]:
         """搜索相似的历史问题"""
@@ -323,11 +335,19 @@ class DualRetrieval:
         self, query: str, top_k_questions: int = 3, top_k_fields: int = 5
     ) -> Dict:
         """执行双重检索：返回相似问题和相关字段"""
+        logger.info(
+            f"[DualRetrieval.retrieve] query={query!r}, top_k_questions={top_k_questions}, top_k_fields={top_k_fields}"
+        )
+
         similar_questions = self.user_retrieval.search_similar_questions(
             query, top_k_questions
         )
         relevant_fields = self.field_retrieval.search_relevant_fields(
             query, top_k_fields
+        )
+
+        logger.info(
+            f"[DualRetrieval.retrieve] done: similar_questions={len(similar_questions)}, relevant_fields={len(relevant_fields)}"
         )
 
         return {

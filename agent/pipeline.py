@@ -1,7 +1,11 @@
+import logging
 from pathlib import Path
 
 from core.llm import LLM
 from rag.sql_retriever import DualRetrieval
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class SQLRAGPipeline:
@@ -13,7 +17,6 @@ class SQLRAGPipeline:
             "你是一个资深的金融数据分析师。"
             "请根据给定的数据库字段信息和历史SQL示例，把用户问题转为 MySQL SQL。"
             "只输出纯 SQL，不要解释，不要 markdown 代码块。"
-            "如果信息不足，输出: -- 信息不足，无法生成可靠SQL"
         )
 
     def build_prompt(self, question: str) -> str:
@@ -51,9 +54,12 @@ class SQLRAGPipeline:
         请直接输出一条可执行的 MySQL SQL。
         """
 
+        logger.info(f"RAG生成的提示词：{prompt}")
+
         return prompt.strip()
 
     def run(self, question: str) -> str:
+        logger.info(f"用户输入自然语言：{question}")
         prompt = self.build_prompt(question)
         sql = self.llm.chat(prompt).strip()
 
