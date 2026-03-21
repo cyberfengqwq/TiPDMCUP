@@ -8,10 +8,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class SQLRAGPipeline:
-    def __init__(self, user: str = "default_user") -> None:
-        self.user = user
-        self.rag = DualRetrieval(user=user)
+class Agent:
+    def __init__(self, session_id: str = "default_session_id") -> None:
+        self.session_id = session_id
+        self.rag = DualRetrieval(user=session_id)
         self.llm = LLM()
         self.llm.role = (
             "你是一个资深的金融数据分析师。"
