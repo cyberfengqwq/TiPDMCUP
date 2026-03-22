@@ -155,6 +155,11 @@ class Retrieval:
 
                 with open(self.meta_path, "r", encoding="utf-8") as f:
                     self.meta = json.load(f)
+
+                for item in self.meta:
+                    if "sql" not in item:
+                        item["sql"] = item.get("query", "")
+
                 logging.info(f"索引已从 {self.index_path} 加载")
             except Exception as e:
                 logging.warning(f"加载索引失败: {e}，将创建新索引")
@@ -285,6 +290,7 @@ class FieldDataRetrieval(Retrieval):
                         "field": field_name,
                         "description": field_desc,
                         "type": "field",
+                        "sql": "",
                     }
                 )
 
