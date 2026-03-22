@@ -2,9 +2,12 @@
 
 import uvicorn
 from fastapi import FastAPI
+from flask import request
 from pydantic import BaseModel
 
 from agent.pipeline import Agent
+from core.company import Company
+from core.core import Data
 
 app = FastAPI(title="ticup")
 
@@ -21,10 +24,23 @@ class ChatRequest(BaseModel):
     prompt: str
     session_id: str
 
+
+datas: Data = Data()
+datas.load_data()
+
+
 @app.post("/login")
 def login() -> tuple[dict, int]:
-
-
+    payload: dict = request.get_json(silent=True) or {}
+    name: str = payload["name"]
+    psw: str = payload["password"]
+    company_name: str = payload["company"]
+    if datas.companies.get(company_name, True):
+        print("公司不存在！！")
+        return {}, 400
+    company: Company | None = datas.companies.get(company_name)
+    assert company is not None
+    if
 
 
 @app.post("/chat")

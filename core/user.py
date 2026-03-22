@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 from agent.pipeline import Agent
 
@@ -60,3 +60,8 @@ class User:
         file_path: Path = self.dir_path / f"{self.__session_id}_data.json"
         with file_path.open("w", encoding="utf-8") as f:
             json.dump(user_file, f, ensure_ascii=False, indent=4)
+
+
+class AdminUser(User):
+    def __init__(self, name: str, psw: str, session_id: str) -> None:
+        super().__init__(name, psw, session_id)
