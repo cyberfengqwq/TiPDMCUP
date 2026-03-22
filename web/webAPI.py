@@ -2,7 +2,6 @@
 
 import uvicorn
 from fastapi import FastAPI
-from flask import request
 from pydantic import BaseModel
 
 from agent.pipeline import Agent

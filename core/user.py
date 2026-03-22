@@ -34,6 +34,14 @@ class User:
 
     @classmethod
     def init_with_json_file(cls, file_path: Path | str) -> "User":
+        """提供由 json 文件来实例化对象的类方法
+        Args:
+            file_path   : Path | str json 文件路径
+
+        Returns:
+            User        : 实例化对象
+        """
+
         file_path = Path(file_path)
         with file_path.open("r", encoding="utf-8") as f:
             data = json.load(f)
