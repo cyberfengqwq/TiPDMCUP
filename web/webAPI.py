@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from agent.pipeline import Agent
 from core.company import Company
 from core.core import Data
+from core.user import User
 
 app = FastAPI(title="ticup")
 
@@ -25,22 +26,34 @@ class ChatRequest(BaseModel):
     session_id: str
 
 
+class LoginRequset(BaseModel):
+    name: str
+    password: str
+    company: str
+
+
 datas: Data = Data()
-datas.load_data()
+# datas.load_data()
 
 
 @app.post("/login")
-def login() -> tuple[dict, int]:
-    payload: dict = request.get_json(silent=True) or {}
-    name: str = payload["name"]
-    psw: str = payload["password"]
-    company_name: str = payload["company"]
+def login(payload: LoginRequset) -> tuple[dict, int]:
+    name: str = payload.name
+    psw: str = payload.password
+    company_name: str = payload.company
     if datas.companies.get(company_name, True):
         print("公司不存在！！")
         return {}, 400
     company: Company | None = datas.companies.get(company_name)
     assert company is not None
-    if
+    if company.users.get(name, True):
+        print("用户不存在！！")
+        return {}, 400
+    user: User | None = company.users.get(name)
+    assert user is not None
+    if user.verification_psw(psw):
+        return user.user_file_dict, 200
+    return {}, 400
 
 
 @app.post("/chat")

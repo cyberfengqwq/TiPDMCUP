@@ -40,3 +40,4 @@ dependencies:
           - langgraph
           - pyecharts
           - pdfplumber
+          - httpx[socks]

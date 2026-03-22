@@ -25,6 +25,11 @@ class User:
 
         self.agent = Agent()
         self.dir_path: Path = USER_DATA / session_id
+        self.user_file_dict: dict[str, str] = {
+            "name": self.name,
+            "session_id": self.__session_id,
+            "password": self.__psw,
+        }
 
     @property
     def get_psw(self) -> str:
@@ -52,14 +57,15 @@ class User:
         return True
 
     def save_data_to_json(self) -> None:
-        user_file: dict[str, str] = {
-            "name": self.name,
-            "password": self.__psw,
-            "session_id": self.__session_id,
-        }
         file_path: Path = self.dir_path / f"{self.__session_id}_data.json"
         with file_path.open("w", encoding="utf-8") as f:
-            json.dump(user_file, f, ensure_ascii=False, indent=4)
+            json.dump(self.user_file_dict, f, ensure_ascii=False, indent=4)
+
+    def verification_psw(self, psw: str) -> bool:
+        psw_hash: str = generate_password_hash(psw)
+        if psw_hash == self.__psw:
+            return True
+        return False
 
 
 class AdminUser(User):
