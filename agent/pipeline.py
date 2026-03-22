@@ -29,7 +29,7 @@ class Agent:
 
         for i, item in enumerate(similar_questions, 1):
             example_lines.append(
-                f"[示例{i}]\n问题：{item.get('text', '')}\nSQL：{item.get('sql, ')}"
+                f"[示例{i}]\n问题：{item.get('text', '')}\nSQL：{item.get('sql', '')}"
             )
 
         field_lines: list[str] = []

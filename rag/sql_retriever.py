@@ -174,8 +174,6 @@ class UserRetrieval(Retrieval):
         persist_root: str = "./faiss_store",
         user: str = "",
     ):
-        if hasattr(self, "index_path"):
-            return
         self.user = user
         self._lock = threading.Lock()
         super().__init__(model_name=model_name, persist_root=persist_root)
@@ -265,8 +263,6 @@ class FieldDataRetrieval(Retrieval):
         model_name: str = "BAAI/bge-m3",
         persist_root: str = "./faiss_global",
     ):
-        if hasattr(self, "index_path"):
-            return
         super().__init__(model_name=model_name, persist_root=persist_root)
         self.init_field_index()
 
