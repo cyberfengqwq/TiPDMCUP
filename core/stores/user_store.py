@@ -8,43 +8,63 @@ class UserStore(BaseJsonStore):
     def __init__(self, file_path: str) -> None:
         super().__init__(file_path)
 
-        self.username_index: dict[str, UserRecord] = {}
-        self.id_index: dict[str, UserRecord] = {}
+        self.users: list[dict[str, str]] = []
+        self.username_dict: dict[str, dict[str, str]] = {}
+        self.id_dict: dict[str, dict[str, str]] = {}
 
         self.reload_index()
 
     def reload_index(self) -> None:
-        """重载用户名以及用户id索引"""
+        """重载用用户id"""
 
         raw_data = self.read_json()
+        self.users = [item for item in raw_data]
+        for user in self.users:
+            self.username_dict[user["username"]] = user
+            self.id_dict[user["id"]] = user
 
-        new_username_index: dict[str, UserRecord] = {}
-        new_id_index: dict[str, UserRecord] = {}
 
-        for item in raw_data:
-            user = UserRecord(
-                id=item["id"],
-                username=item["username"],
-                password_hash=item["password_hash"],
-                status=item["status"],
-            )
-            new_username_index[item["username"]] = user
-            new_id_index[item["id"]] = user
+    def create_user(self, user_data: dict) -> UserRecord:
+        """创建用户实例
+        Args:
+            user_data   : dict  包含用户信息的字典
 
-        self.username_index = new_username_index
-        self.id_index = new_id_index
+        Returns:
+            UserRecord  : 返回一个用户对象实例
+
+        """
+        return UserRecord(**user_data)
+
 
     def get_by_username(self, username: str) -> UserRecord | None:
-        """通过用户名查找用户
+        """通过 username 查找用户
         Args:
-            username    : str 输入的用户名
+            username    : str 输入的username
 
         Returns:
             UserRecord  : 若成功找到该用户
             None        : 查询不到该用户
 
         """
-        return self.username_index.get(username)
+        if self.username_dict.get(username) is None:
+            return None
+
+        return self.create_user(self.username_dict.get(username, {}))
 
     def get_by_id(self, id: str) -> UserRecord | None:
-        return self.id_index.get(id)
+        """通过 id 查找用户
+        Args:
+            id          : str 输入的id
+
+        Returns:
+            UserRecord  : 若成功找到该用户
+            None        : 查询不到该用户
+
+        """
+        if self.id_dict.get(id) is None:
+            return None
+
+        return self.create_user(self.id_dict.get(id, {}))
+
+
+    def save_all(self, )
