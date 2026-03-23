@@ -1,0 +1,20 @@
+[
+    {
+        "user_id": "1",
+        "company_id": "qwq",
+        "role": "admin",
+        "joined_at": "2024-06-01"
+    },
+    {
+        "user_id": "2",
+        "company_id": "qwq",
+        "role": "member",
+        "joined_at": "2024-06-02"
+    },
+    {
+        "user_id": "3",
+        "company_id": "awa",
+        "role": "member",
+        "joined_at": "2024-06-03"
+    }
+]
