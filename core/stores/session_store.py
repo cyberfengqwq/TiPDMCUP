@@ -1,6 +1,6 @@
 # core/stores/session_store.py
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from core.domain.models import SessionPrincipal
 from core.stores.base_json_store import BaseJsonStore
@@ -91,3 +91,31 @@ class SessionStore(BaseJsonStore):
             ]
 
             self.write_json_atomic(self.raw_sessions)
+
+    def cleanup_expired(self) -> int:
+        """清理过期会话
+        Returns:
+            int: 清除掉的过期会话数量
+        """
+        with self.__lock:
+            current_time = datetime.now(timezone.utc)
+            valid_session: list[dict] = []
+
+            for session in self.raw_sessions:
+                expires_at = datetime.fromisoformat(session["expires_at"])
+
+                if expires_at > current_time:
+                    valid_session.append(session)
+
+            remove_count: int = len(self.raw_sessions) - len(valid_session)
+
+            if remove_count > 0:
+                self.raw_sessions = valid_session
+
+                self.session_index = {
+                    item["session_id"]: item for item in self.raw_sessions
+                }
+
+                self.write_json_atomic(self.raw_sessions)
+
+            return remove_count
