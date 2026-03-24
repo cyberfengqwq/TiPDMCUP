@@ -19,7 +19,7 @@ class MembershipStore(BaseJsonStore):
             str, list[dict]
         ] = {}  # company_id -> [membership_dict, ...]
         self.pair_index: dict[
-            tuple[str, str], list[dict]
+            tuple[str, str], dict
         ] = {}  # (user_id, company_id) -> membership_dict
 
         self.reload_index()
@@ -52,7 +52,7 @@ class MembershipStore(BaseJsonStore):
         self.company_index = comp_idx
         self.user_index = user_idx
 
-    def to_model(self, data: dict) -> Membership
+    def to_model(self, data: dict) -> Membership:
         """用字典实例化对象
         Args:
             data        : dict 包含连接信息的字典
@@ -74,3 +74,45 @@ class MembershipStore(BaseJsonStore):
         """
         items: list[dict] = self.user_index.get(user_id, [])
         return [self.to_model(item) for item in items]
+
+    def get_role_in_company(self, user_id: str, company_id: str) -> list[str]:
+        """获取用户在公司的职位
+        Args:
+            user_id     : str 用户 id
+            company_id  : str 公司 id
+
+        Returns:
+            list[str]   : 用户在公司的职位
+        """
+        item: dict = self.pair_index.get((user_id, company_id), {})
+        return item["roles"] if item else []
+
+    def save(self, memberships: list[Membership]) -> None:
+        """保存成员关系至 Json 文件
+
+        Args:
+            memberships: list[Membership] 包含成员与公司关系的列表
+        """
+        if not memberships:
+            return
+
+        with self.__lock:
+            for m in memberships:
+                m_dict: dict = {
+                    "user_id": m.user_id,
+                    "company_id": m.company_id,
+                    "roles": m.roles,
+                    "joined_at": m.joined_at.isoformat(),
+                }
+
+                key: tuple[str, str] = (m.user_id, m.company_id)
+                existing_item: dict | None = self.pair_index.get(key)
+
+                if existing_item:
+                    existing_item.update(m_dict)
+                else:
+                    self.raw_data.append(m_dict)
+
+            self.write_json_atomic(self.raw_data)
+
+            self.reload_index()

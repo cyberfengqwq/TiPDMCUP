@@ -43,7 +43,7 @@ class Membership:
 @dataclass
 class SessionPrincipal:
     """
-    启动服务器时实例化的对象
+    生命周期内的对象
     """
 
     session_id: str
