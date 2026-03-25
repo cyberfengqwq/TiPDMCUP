@@ -4,7 +4,7 @@ from pathlib import Path
 
 from core.stores.base_json_store import BaseJsonStore
 
-ROOT_DIR: Path = Path.cwd()
+ROOT_DIR: Path = Path.cwd().parent.parent
 
 
 class ChatStore(BaseJsonStore):
