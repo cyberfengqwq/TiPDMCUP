@@ -1,5 +1,7 @@
 # core/stores/membership_store.py
 
+from datetime import datetime
+
 from core.domain.models import Membership
 from core.stores.base_json_store import BaseJsonStore
 
@@ -61,7 +63,12 @@ class MembershipStore(BaseJsonStore):
             Membership  : 实例对象
         """
 
-        return Membership(**data)
+        return Membership(
+            user_id=data["user_id"],
+            company_id=data["company_id"],
+            roles=data.get("roles", []),
+            joined_at=datetime.fromisoformat(data["joined_at"]),
+        )
 
     def get_by_user(self, user_id: str) -> list[Membership]:
         """通过用户获取链接关系
@@ -96,7 +103,7 @@ class MembershipStore(BaseJsonStore):
         if not memberships:
             return
 
-        with self.__lock:
+        with self._lock:
             for m in memberships:
                 m_dict: dict = {
                     "user_id": m.user_id,

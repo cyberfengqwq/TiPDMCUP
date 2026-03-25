@@ -1,5 +1,7 @@
 # core/stores/user_store.py
 
+from typing import Any
+
 from core.domain.models import UserRecord
 from core.stores.base_json_store import BaseJsonStore
 
@@ -8,9 +10,9 @@ class UserStore(BaseJsonStore):
     def __init__(self, file_path: str) -> None:
         super().__init__(file_path)
 
-        self.users: list[dict[str, str]] = []
-        self.username_dict: dict[str, dict[str, str]] = {}
-        self.id_dict: dict[str, dict[str, str]] = {}
+        self.users: list[dict[str, Any]] = []
+        self.username_dict: dict[str, dict[str, Any]] = {}
+        self.id_dict: dict[str, dict[str, Any]] = {}
         self.reload_index()
 
     def reload_index(self) -> None:
@@ -43,10 +45,10 @@ class UserStore(BaseJsonStore):
             None        : 查询不到该用户
 
         """
-        if self.username_dict.get(username) is None:
-            return None
-
-        return self.create_user(self.username_dict.get(username, {}))
+        user_data = self.username_dict.get(username)
+        if user_data is None:
+            return
+        return self.create_user(user_data)
 
     def get_by_id(self, id: str) -> UserRecord | None:
         """通过 id 查找用户
@@ -73,7 +75,7 @@ class UserStore(BaseJsonStore):
         if not users_list:
             return None
 
-        with self.__lock:
+        with self._lock:
             for user in users_list:
                 user_dict: dict = {
                     "id": user.id,

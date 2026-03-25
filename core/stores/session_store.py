@@ -56,7 +56,7 @@ class SessionStore(BaseJsonStore):
             session: SessionPrincipal 要创建用户对话的实例对象
 
         """
-        with self.__lock:
+        with self._lock:
             session_dict: dict = {
                 "session_id": session.session_id,
                 "user_id": session.user_id,
@@ -81,7 +81,7 @@ class SessionStore(BaseJsonStore):
             session_id: str 生命周期结束的用户会话
         """
 
-        with self.__lock:
+        with self._lock:
             if session_id not in self.session_index:
                 return
 
@@ -97,7 +97,7 @@ class SessionStore(BaseJsonStore):
         Returns:
             int: 清除掉的过期会话数量
         """
-        with self.__lock:
+        with self._lock:
             current_time = datetime.now(timezone.utc)
             valid_session: list[dict] = []
 

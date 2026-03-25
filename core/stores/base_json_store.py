@@ -15,7 +15,7 @@ class BaseJsonStore:
 
     def __init__(self, file_path: str) -> None:
         self.file_path = Path(file_path)
-        self.__lock = RLock()
+        self._lock = RLock()
 
     def read_json(self) -> Any:
         """读取 Json 文件
@@ -23,7 +23,7 @@ class BaseJsonStore:
         Returns:
             读取之后返回的 Json 文件对象
         """
-        with self.__lock:
+        with self._lock:
             if not self.file_path.exists():
                 return []
             with self.file_path.open("r", encoding="utf-8") as f:
@@ -39,7 +39,7 @@ class BaseJsonStore:
             e   : 写入错误
 
         """
-        with self.__lock:
+        with self._lock:
             temp_dir: Path = self.file_path.parent / "temp"
             temp_dir.mkdir(parents=True, exist_ok=True)
             fd, temp_str = tempfile.mkstemp(
