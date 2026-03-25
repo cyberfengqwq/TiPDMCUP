@@ -1,4 +1,4 @@
-# rag/sql_retriever.py
+# core/rag/sql_retriever.py
 
 import logging
 import threading
@@ -16,6 +16,8 @@ from config.db_schema import SQL_EXAMPLES
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+ROOT_DIR: Path = Path.cwd().parent.parent
 
 
 class Retrieval:
@@ -306,32 +308,41 @@ class FieldDataRetrieval(Retrieval):
 class DualRetrieval:
     """双重检索器：同时检索用户历史问题和数据库字段信息"""
 
-    shared_field_retrieval: Optional["FieldDataRetrieval"] = None
-    field_store_path = "./faiss_field_store"
+    _field_retrievals: dict = {}
     _lock = threading.Lock()
 
     def __init__(
         self,
         model_name: str = "BAAI/bge-m3",
-        persist_root: str | Path = "./faiss_dual_store",
-        user: str = "",
+        user_id: str = "",
+        company_id: str = "default_company",
+        persist_root: Path = ROOT_DIR / "data" / "companies",
     ):
-        self.persist_root = Path(persist_root)
-        self.user = user
+        persist_root.mkdir(exist_ok=True, parents=True)
+        self.persist_root = persist_root
 
-        user_store_path = self.persist_root / "user_store"
+        self.user_id = user_id
+        self.company_id = company_id
+
+        user_store_path: Path = (
+            ROOT_DIR / "data" / "users" / f"{user_id}" / "faiss_history"
+        )
+        user_store_path.mkdir(exist_ok=True, parents=True)
 
         self.user_retrieval = UserRetrieval(
-            model_name=model_name, persist_root=str(user_store_path), user=user
+            model_name=model_name, persist_root=str(user_store_path), user=user_id
         )
 
         with DualRetrieval._lock:
-            if DualRetrieval.shared_field_retrieval is None:
-                DualRetrieval.shared_field_retrieval = FieldDataRetrieval(
-                    model_name=model_name, persist_root=DualRetrieval.field_store_path
+            if company_id not in DualRetrieval._field_retrievals:
+                company_store_path: Path = (
+                    self.persist_root / company_id / "faiss_store"
+                )
+                DualRetrieval._field_retrievals[company_id] = FieldDataRetrieval(
+                    model_name=model_name, persist_root=str(company_store_path)
                 )
 
-        self.field_retrieval = DualRetrieval.shared_field_retrieval
+        self.field_retrieval = DualRetrieval._field_retrievals[company_id]
 
     def retrieve(
         self, query: str, top_k_questions: int = 3, top_k_fields: int = 5

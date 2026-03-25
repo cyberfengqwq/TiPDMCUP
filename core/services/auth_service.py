@@ -13,6 +13,10 @@ from core.stores.user_store import UserStore
 
 
 class AuthService:
+    """
+    验证服务类，用来解析用户登陆以及构建 Runtime Session
+    """
+
     def __init__(
         self,
         user_store: UserStore,
@@ -20,6 +24,7 @@ class AuthService:
         membership_store: MembershipStore,
         session_store: SessionStore,
     ) -> None:
+
         self.user_store = user_store
         self.company_store = company_store
         self.membership_store = membership_store
@@ -34,6 +39,17 @@ class AuthService:
         password: str,
         company_id: str,
     ) -> SessionPrincipal | None:
+        """登陆接口
+        Args:
+            user_id             : str 用户 id
+            password            : str 用户输入的密码
+            company_id          : str 公司 id
+
+        Returns:
+            SessionPrincipal    : 登陆成功返回 RuntimeSession 数据对象
+            None                : 登陆失败
+        """
+
         user: UserRecord | None = self.user_store.get_by_id(user_id)
         if not user:
             return
