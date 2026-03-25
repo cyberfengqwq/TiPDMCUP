@@ -82,7 +82,7 @@ class MembershipStore(BaseJsonStore):
         items: list[dict] = self.user_index.get(user_id, [])
         return [self.to_model(item) for item in items]
 
-    def get_role_in_company(self, user_id: str, company_id: str) -> list[str]:
+    def get_role_in_company(self, user_id: str, company_id: str) -> list[str] | None:
         """获取用户在公司的职位
         Args:
             user_id     : str 用户 id
@@ -90,9 +90,10 @@ class MembershipStore(BaseJsonStore):
 
         Returns:
             list[str]   : 用户在公司的职位
+            None        : 用户不在此公司
         """
         item: dict = self.pair_index.get((user_id, company_id), {})
-        return item["roles"] if item else []
+        return item["roles"] if item else None
 
     def save(self, memberships: list[Membership]) -> None:
         """保存成员关系至 Json 文件
