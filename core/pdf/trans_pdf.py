@@ -5,67 +5,35 @@ from pathlib import Path
 import pandas as pd
 import pdfplumber
 
-
-@dataclass
-class DF:
-    """
-    初始化一系列目标 DataFrame
-    """
-
-    annual_dfs: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame])
-    quarter_dfs: list[pd.DataFrame] = field(default_factory=list[pd.DataFrame])
-
-    processed_dfs: list[list[pd.DataFrame]] = field(
-        default_factory=list[list[pd.DataFrame]]
-    )
-
-    core_performance_indicators_sheet: pd.DataFrame = field(
-        default_factory=pd.DataFrame
-    )  # 业绩指标pd
-    balance_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 资产负债pd
-    income_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 利润pd
-    cash_flow_sheet: pd.DataFrame = field(default_factory=pd.DataFrame)  # 现金流pd
-
-    def __post_init__(self) -> None:
-        if not self.process_dfs:
-            self.process_dfs = [self.annual_dfs, self.quarter_dfs]
-
-
-@dataclass
-class Table:
-    """
-    初始化处理过程中的表格
-    """
-
-    raw_tables: list[pd.DataFrame] = field(
-        default_factory=list[pd.DataFrame]
-    )  # "生"表格
-    tables_all: list[pd.DataFrame] = field(
-        default_factory=list[pd.DataFrame]
-    )  # "熟"表格
-
+from core.pdf.data_init import DF, Table
 
 class TransPDF:
     def __init__(self) -> None:
         # 初始化 dataclasses
         self.df = DF()
         self.table = Table()
+        self.source_filename = ""
 
     # 核心成员函数
-    def extract_all_tables(self, file_path: Path) -> None:
+    def extract_all_tables(self, file_path: str | Path) -> None:
         """1. 从 PDF 中提取所有表格为Datarame,
            并放在 "生"表格 列表当中
 
         Args:
-            file_path (Path): 文件相对路径
+            file_path (str | Path): 文件相对路径
         """
+        self.source_filename = Path(file_path).name
+
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
                 tables: list[list] | None = page.extract_table()
                 assert tables is not None
                 for table in tables:
                     if table:
-                        self.table.raw_tables.append(pd.DataFrame(table))
+                        cleaned_table = [row for row in table
+                                            if any(cell for cell in row) ]
+                        if cleaned_table:
+                            self.table.raw_tables.append(pd.DataFrame(table))
 
     def identify_target_tables(self) -> None:
         """
@@ -74,24 +42,31 @@ class TransPDF:
 
         for df in self.table.raw_tables:
             # 初步清洗表格中的 "/n" 和 " ", 方便接下来的识别
-            head_str = df.head(len(df)).to_string().replace("/n", "").replace(" ", "")
+            head_str = df.head(len(df)).to_string().replace("\n", "").replace(" ", "")
 
             # 识别年度表和季度表
             if (
                 "总资产" in head_str and "营业收入" in head_str
             ) or "本年比上年" in head_str:
                 self.df.annual_dfs.append(df)
-            elif any(q in head_str for q in ["一季度", "第一季度", "Q1"]):
+            elif any(q in head_str for q in ["一季度", "第一季度", "Q1", "第三季度", "Q3"]):
                 self.df.quarter_dfs.append(df)
 
     def _clean_and_format(self):
         """
-        3. 清洗 DataFrame : 处理表头、换行符、数字‘，’
+        3. 清洗 DataFrame : 处理表头、换行符、数字‘，’、空值
         """
         for dfs in self.df.processed_dfs:
-            for df in dfs:
-                df_clean: pd.DataFrame = df.copy()
+            for i in range(len(dfs)):
+                df_raw: pd.DataFrame = dfs[i].copy()
 
+                # 1. 替换所有换行符
+                df_raw = df_raw.replace(r'\\n', '', regex=True)
+
+                # 2. 去除数字中的千分位逗号
+                df_raw = df_raw.map(lambda x: str(x).replace(',', ''))
+
+                # 3.
     def _merge_and_split(self, annual_df, quater_df):
         """
         4. 合并表格，打上来源标签，分配到四个空的主要目标 DataFrame 中
