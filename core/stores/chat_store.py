@@ -20,7 +20,7 @@ class ChatStore(BaseJsonStore):
         data: list[dict] = self.read_json()
         return data if data else []
 
-    def append_message(self, messages: list[dict]) -> None:
+    def append_messages(self, messages: list[dict]) -> None:
         """追加新的消息
         Args:
             messages: list[dict] 包含新增消息的列表
