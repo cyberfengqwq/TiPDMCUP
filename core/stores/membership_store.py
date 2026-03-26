@@ -1,6 +1,7 @@
 # core/stores/membership_store.py
 
 from datetime import datetime
+from pathlib import Path
 
 from core.domain.models import Membership
 from core.stores.base_json_store import BaseJsonStore
@@ -11,7 +12,7 @@ class MembershipStore(BaseJsonStore):
     用户与公司对应关系
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str | Path) -> None:
         super().__init__(file_path)
 
         self.raw_data: list[dict] = []

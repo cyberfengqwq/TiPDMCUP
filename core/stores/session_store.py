@@ -1,13 +1,14 @@
 # core/stores/session_store.py
 
 from datetime import datetime, timezone
+from pathlib import Path
 
 from core.domain.models import SessionPrincipal
 from core.stores.base_json_store import BaseJsonStore
 
 
 class SessionStore(BaseJsonStore):
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str | Path) -> None:
         super().__init__(file_path)
 
         self.raw_sessions: list[dict] = []

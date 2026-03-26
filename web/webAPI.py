@@ -1,66 +1,36 @@
 # web/webAPI.py
 
-import uvicorn
+import logging
+from pathlib import Path
+
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.security import HTTPBearer
 
-from agent.pipeline import Agent
-from core.company import Company
-from core.core import Data
-from core.user import User
+from core.services.auth_service import AuthService
+from core.services.company_registry import CompanyRegistry
+from core.stores.company_store import CompanyStore
+from core.stores.membership_store import MembershipStore
+from core.stores.session_store import SessionStore
+from core.stores.user_store import UserStore
 
-app = FastAPI(title="ticup")
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-sessions: dict[str, Agent] = {}
+app = FastAPI(title="ticup", version="1.0.0")
+bearer_scheme = HTTPBearer(auto_error=False)
 
-
-def get_or_create_session(session_id: str) -> Agent:
-    if session_id not in sessions:
-        sessions[session_id] = Agent(session_id)
-    return sessions[session_id]
-
-
-class ChatRequest(BaseModel):
-    prompt: str
-    session_id: str
+USER_JSON = Path("./data/users/users.json")
+COMPANY_JSON = Path("./data/users/companies.json")
+MEMBERSHIP_JSON = Path("./data/users/memberships.json")
+SESSION_JSON = Path("./data/users/sessions.json")
 
 
-class LoginRequset(BaseModel):
-    name: str
-    password: str
-    company: str
+user_store = UserStore(USER_JSON)
+company_store = CompanyStore(COMPANY_JSON)
+membership_store = MembershipStore(MEMBERSHIP_JSON)
+session_store = SessionStore(SESSION_JSON)
 
+company_registry = CompanyRegistry(company_store)
+company_registry.reload()
 
-datas: Data = Data()
-# datas.load_data()
-
-
-@app.post("/login")
-def login(payload: LoginRequset) -> tuple[dict, int]:
-    name: str = payload.name
-    psw: str = payload.password
-    company_name: str = payload.company
-    if datas.companies.get(company_name, True):
-        print("公司不存在！！")
-        return {}, 400
-    company: Company | None = datas.companies.get(company_name)
-    assert company is not None
-    if company.users.get(name, True):
-        print("用户不存在！！")
-        return {}, 400
-    user: User | None = company.users.get(name)
-    assert user is not None
-    if user.verification_psw(psw):
-        return user.user_file_dict, 200
-    return {}, 400
-
-
-@app.post("/chat")
-def chat_endpoint(request: ChatRequest) -> str:
-    user_agent: Agent = get_or_create_session(request.session_id)
-
-    return user_agent.run(request.prompt)
-
-
-def run_app() -> None:
-    uvicorn.run(app, host="0.0.0.0", port=1515)
+auth_service = AuthService()

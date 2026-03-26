@@ -13,7 +13,7 @@ class BaseJsonStore:
     基础的 Json 文件读写类
     """
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str | Path) -> None:
         self.file_path = Path(file_path)
         self._lock = RLock()
 

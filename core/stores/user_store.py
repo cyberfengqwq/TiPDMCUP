@@ -1,5 +1,6 @@
 # core/stores/user_store.py
 
+from pathlib import Path
 from typing import Any
 
 from core.domain.models import UserRecord
@@ -7,7 +8,7 @@ from core.stores.base_json_store import BaseJsonStore
 
 
 class UserStore(BaseJsonStore):
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str | Path) -> None:
         super().__init__(file_path)
 
         self.users: list[dict[str, Any]] = []
