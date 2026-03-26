@@ -2,7 +2,7 @@
 
 import logging
 
-from core.rag.memery_retrieval import UserProfileRetrieval
+from core.rag.memory_retrieval import UserProfileRetrieval
 from core.services.llm_service import LLM
 from core.stores.chat_store import ChatStore
 from core.stores.profile_store import ProfileStore

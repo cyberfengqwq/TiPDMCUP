@@ -3,7 +3,7 @@
 
 from logging import Logger
 
-from core.rag.memery_retrieval import UserProfileRetrieval
+from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.sql_retriever import DualRetrieval
 from core.services.llm_service import LLM
 from core.stores.chat_store import ChatStore
