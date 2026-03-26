@@ -10,7 +10,7 @@ DATABASE_SCHEMA_DICT: dict[str, dict[str, str]] = {
         "operating_revenue_yoy_growth": "营业总收入-同比增长(%)",
         "operating_revenue_qoq_growth": "营业总收入-季度环比增长(%)",
         "net_profit_10k_yuan": "净利润(万元)",
-        "net_prof it_yoy_growth": "净利润-同比增长(%)",
+        "net_profit_yoy_growth": "净利润-同比增长(%)",
         "net_profit_qoq_growth": "净利润-季度环比增长(%)",
         "net_asset_per_share": "每股净资产(元)",
         "roe": "净资产收益率(%)",
