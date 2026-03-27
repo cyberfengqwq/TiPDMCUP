@@ -1,0 +1,8 @@
+[
+    {
+        "id": "u_test_001",
+        "username": "测试用户",
+        "password_hash": "$2b$12$oKVYEoqRrlYcWI4Eyj96Y.BccPtM0RXCh7wXi6R3kQHtzBKwrywq.",
+        "status": "active"
+    }
+]

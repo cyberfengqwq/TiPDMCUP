@@ -53,7 +53,7 @@ class MembershipStore(BaseJsonStore):
 
         self.user_index = user_idx
         self.company_index = comp_idx
-        self.user_index = user_idx
+        self.pair_index = pair_idx
 
     def to_model(self, data: dict) -> Membership:
         """用字典实例化对象

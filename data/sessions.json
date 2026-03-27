@@ -1,0 +1,12 @@
+[
+    {
+        "session_id": "114809dc-9ee0-4042-9531-2820b442a24c",
+        "user_id": "u_test_001",
+        "active_company_id": "c_test_001",
+        "roles": [
+            "analyst"
+        ],
+        "issued_at": "2026-03-27T01:50:57.048221+00:00",
+        "expires_at": "2026-03-27T03:50:57.048221+00:00"
+    }
+]

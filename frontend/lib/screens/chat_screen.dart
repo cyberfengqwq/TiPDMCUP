@@ -6,7 +6,9 @@ import '../models/chat_message.dart';
 import '../services/api_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final SessionInfo session;
+
+  const ChatScreen({Key? key, required this.session}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -15,7 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final String _sessionId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
+  final String _chatId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
   final List<ChatMessage> _messages = [
     ChatMessage(
       text: "你好！我是上市公司财报智能问数助手，请问有什么可以帮您？\n例如您能问：\n- 贵州茅台2023年的净利润是多少？\n- 对比下比亚迪和五粮液的研发投入占比。",
@@ -40,7 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 2. 请求 Python 后端接口
     final String reply = await ApiService.sendMessage(
       text,
-      sessionId: _sessionId,
+      chatId: _chatId,
     );
 
     // 3. 将回答填入列表

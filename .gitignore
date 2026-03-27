@@ -5,3 +5,6 @@
 ./data/__pycache__/
 ./web/__pycache__/
 .env
+
+./.zed/
+./.vscode/

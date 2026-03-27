@@ -25,10 +25,11 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title="ticup", version="1.0.0")
 bearer_scheme = HTTPBearer(auto_error=False)
 
-USER_JSON = Path("./data/users/users.json")
-COMPANY_JSON = Path("./data/users/companies.json")
-MEMBERSHIP_JSON = Path("./data/users/memberships.json")
-SESSION_JSON = Path("./data/users/sessions.json")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+USER_JSON = PROJECT_ROOT / "data/users.json"
+COMPANY_JSON = PROJECT_ROOT / "data/companies.json"
+MEMBERSHIP_JSON = PROJECT_ROOT / "data/memberships.json"
+SESSION_JSON = PROJECT_ROOT / "data/sessions.json"
 
 
 user_store = UserStore(USER_JSON)
@@ -52,7 +53,8 @@ class LoginRequest(BaseModel):
         ..., description="用户ID（当前 AuthService.login 使用 user_id）"
     )
     password: str
-    compay_id: str
+    company_id: str | None = Field(None, description="公司ID（推荐字段）")
+    compay_id: str | None = Field(None, description="兼容旧字段拼写")
 
 
 class LoginResponse(BaseModel):
@@ -107,10 +109,14 @@ def get_current_session(
 
 @app.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest) -> LoginResponse:
+    company_id = (payload.company_id or payload.compay_id or "").strip()
+    if not company_id:
+        raise HTTPException(status_code=400, detail="company_id is required")
+
     session = auth_service.login(
         user_id=payload.user_id,
         password=payload.password,
-        company_id=payload.compay_id,
+        company_id=company_id,
     )
 
     if session is None:

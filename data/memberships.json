@@ -1,0 +1,10 @@
+[
+    {
+        "user_id": "u_test_001",
+        "company_id": "c_test_001",
+        "roles": [
+            "analyst"
+        ],
+        "joined_at": "2026-03-27T00:00:00+00:00"
+    }
+]

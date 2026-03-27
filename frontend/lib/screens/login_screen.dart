@@ -32,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final result = await ApiService.login(
-      company: company,
-      account: account,
+      companyId: company,
+      userId: account,
       password: password,
     );
 
@@ -43,10 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = false;
     });
 
-    if (result.success) {
+    if (result.success && result.session != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => HomeScreen(session: result.session!)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _companyController,
                 decoration: const InputDecoration(
-                  labelText: "公司/机构代码",
+                  labelText: "公司ID",
                   prefixIcon: Icon(Icons.business),
                   border: OutlineInputBorder(),
                   filled: true,
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _accountController,
                 decoration: const InputDecoration(
-                  labelText: "姓名/工号",
+                  labelText: "用户ID",
                   prefixIcon: Icon(Icons.person),
                   border: OutlineInputBorder(),
                   filled: true,

@@ -1,26 +1,54 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+class SessionInfo {
+  final String sessionId;
+  final String userId;
+  final String companyId;
+  final List<String> roles;
+  final String expiresAt;
+
+  const SessionInfo({
+    required this.sessionId,
+    required this.userId,
+    required this.companyId,
+    required this.roles,
+    required this.expiresAt,
+  });
+
+  factory SessionInfo.fromJson(Map<String, dynamic> json) {
+    final dynamic rawRoles = json['roles'];
+    return SessionInfo(
+      sessionId: json['session_id']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
+      companyId: json['company_id']?.toString() ?? '',
+      roles: rawRoles is List ? rawRoles.map((e) => e.toString()).toList() : const [],
+      expiresAt: json['expires_at']?.toString() ?? '',
+    );
+  }
+}
+
 class LoginResult {
   final bool success;
   final String message;
-  final Map<String, dynamic>? user;
+  final SessionInfo? session;
 
   const LoginResult({
     required this.success,
     required this.message,
-    this.user,
+    this.session,
   });
 }
 
 class ApiService {
-  // 【重要】因为您在使用真机调试，这里必须填入您 Mac 电脑的局域网 IPv4 地址！
-  // 例如: 'http://192.168.1.100:5000' (视您的Python后端端口而定)
   static const String baseUrl = 'http://101.37.80.57:1516';
+  static SessionInfo? _currentSession;
+
+  static SessionInfo? get currentSession => _currentSession;
 
   static Future<LoginResult> login({
-    required String company,
-    required String account,
+    required String companyId,
+    required String userId,
     required String password,
   }) async {
     try {
@@ -30,9 +58,10 @@ class ApiService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'company': company,
-          'name': account,
+          'user_id': userId,
           'password': password,
+          // 后端字段当前为 compay_id（后端拼写如此）
+          'compay_id': companyId,
         }),
       );
 
@@ -45,54 +74,90 @@ class ApiService {
       }
 
       if (response.statusCode == 200) {
-        final dynamic userData = data?['user'];
+        final session = data == null ? null : SessionInfo.fromJson(data);
+        _currentSession = session;
         return LoginResult(
           success: true,
-          message: data?['message']?.toString() ?? '登录成功',
-          user: userData is Map<String, dynamic> ? userData : null,
+          message: '登录成功',
+          session: session,
         );
       }
 
       return LoginResult(
         success: false,
-        message: data?['message']?.toString() ?? '登录失败，状态码: ${response.statusCode}',
+        message: data?['detail']?.toString() ?? '登录失败，状态码: ${response.statusCode}',
       );
     } catch (e) {
       return LoginResult(success: false, message: '网络请求发生错误: $e');
     }
   }
 
-  static Future<String> sendMessage(
-    String prompt, {
-    required String sessionId,
+  static Future<String> sendMessage(String prompt, {
+    required String chatId,
+    bool isEnd = false,
   }) async {
     try {
+      final sessionId = _currentSession?.sessionId;
+      if (sessionId == null || sessionId.isEmpty) {
+        return '未登录或会话已失效，请重新登录';
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/chat'),
         headers: {
-          'Content-Type': 'application/json', // 假设您的后端接收 JSON
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $sessionId',
         },
         body: jsonEncode({
           'prompt': prompt,
-          'session_id': sessionId,
+          'chat_id': chatId,
+          'is_end': isEnd,
         }),
       );
 
       if (response.statusCode == 200) {
-        // 解决中文乱码问题
         final decodedBody = utf8.decode(response.bodyBytes);
-        
-        // 如果您的后端直接返回纯字符串：
-        return decodedBody;
-        
-        // 如果您的后端返回的是 JSON 格式，如 {"message": "你好"}，请改成下面这样解包：
-        // final jsonResponse = jsonDecode(decodedBody);
-        // return jsonResponse['message'] ?? '无返回内容';
+        try {
+          final jsonResponse = jsonDecode(decodedBody) as Map<String, dynamic>;
+          return jsonResponse['answer']?.toString() ?? '无返回内容';
+        } catch (_) {
+          return decodedBody;
+        }
       } else {
-        return '请求失败，状态码: ${response.statusCode}';
+        final decodedBody = utf8.decode(response.bodyBytes);
+        try {
+          final jsonResponse = jsonDecode(decodedBody) as Map<String, dynamic>;
+          return jsonResponse['detail']?.toString() ?? '请求失败，状态码: ${response.statusCode}';
+        } catch (_) {
+          return '请求失败，状态码: ${response.statusCode}';
+        }
       }
     } catch (e) {
       return '网络请求发生错误: $e';
+    }
+  }
+
+  static Future<bool> logout() async {
+    final sessionId = _currentSession?.sessionId;
+    if (sessionId == null || sessionId.isEmpty) {
+      _currentSession = null;
+      return true;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/logout'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $sessionId',
+        },
+        body: jsonEncode({}),
+      );
+      _currentSession = null;
+      return response.statusCode == 200;
+    } catch (_) {
+      _currentSession = null;
+      return false;
     }
   }
 }
