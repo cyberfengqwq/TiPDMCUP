@@ -1,0 +1,23 @@
+name: tipdmcupfrontend
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  cached_network_image: ^3.4.1
+  flutter:
+    sdk: flutter
+  flutter_markdown: ^0.7.7+1
+  http: ^1.6.0
+  photo_view: ^0.15.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
