@@ -54,7 +54,6 @@ class LoginRequest(BaseModel):
     )
     password: str
     company_id: str | None = Field(None, description="公司ID（推荐字段）")
-    compay_id: str | None = Field(None, description="兼容旧字段拼写")
 
 
 class LoginResponse(BaseModel):
@@ -109,7 +108,7 @@ def get_current_session(
 
 @app.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest) -> LoginResponse:
-    company_id = (payload.company_id or payload.compay_id or "").strip()
+    company_id = (payload.company_id or payload.company_id or "").strip()
     if not company_id:
         raise HTTPException(status_code=400, detail="company_id is required")
 

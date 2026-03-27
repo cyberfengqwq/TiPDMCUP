@@ -60,8 +60,8 @@ class ApiService {
         body: jsonEncode({
           'user_id': userId,
           'password': password,
-          // 后端字段当前为 compay_id（后端拼写如此）
-          'compay_id': companyId,
+          // 后端字段当前为 company_id（后端拼写如此）
+          'company_id': companyId,
         }),
       );
 
