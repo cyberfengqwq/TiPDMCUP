@@ -17,7 +17,7 @@ from config.db_schema import SQL_EXAMPLES
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-ROOT_DIR: Path = Path.cwd().parent.parent
+ROOT_DIR: Path = Path.cwd()
 
 
 class Retrieval:
@@ -211,7 +211,7 @@ class UserRetrieval(Retrieval):
                 }
             )
 
-        config_dir = Path(__file__).parent.parent / "config"
+        config_dir = Path(__file__) / "config"
         history_file = (
             config_dir / f"{self.user}_history_db.json"
             if self.user

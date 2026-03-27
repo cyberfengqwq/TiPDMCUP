@@ -5,7 +5,7 @@ from typing import Any
 
 from core.stores.base_json_store import BaseJsonStore
 
-ROOT_DIR: Path = Path.cwd().parent.parent
+ROOT_DIR: Path = Path.cwd()
 USER_DATA_DIR: Path = ROOT_DIR / "data" / "users"
 USER_DATA_DIR.mkdir(exist_ok=True, parents=True)
 
