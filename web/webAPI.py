@@ -64,6 +64,13 @@ class LoginResponse(BaseModel):
     expires_at: str
 
 
+class RegisterRequest(BaseModel):
+    user_id: str = Field(..., description="用户 ID")
+    username: str = Field(..., description="用户名")
+    password: str = Field(..., min_length=6, description="密码")
+    company_id: str = Field(..., description="公司 ID")
+
+
 class ChatRequest(BaseModel):
     prompt: str
     chat_id: str = Field(..., description="前端对话窗口ID")
@@ -139,6 +146,20 @@ def me(current_session=Depends(get_current_session)) -> MeResponse:
         roles=current_session.roles,
         expires_at=current_session.expires_at.isoformat(),
     )
+
+
+@app.post("/register")
+def register(payload: RegisterRequest) -> dict | None:
+    ok = auth_service.register(
+        user_id=payload.user_id,
+        username=payload.username,
+        password=payload.password,
+        company_id=payload.company_id,
+        roles=["member"],
+    )
+    if not ok:
+        raise HTTPException(status_code=400, detail="注册失败！用户已存在或公司不存在")
+    return {"ok": True, "message": "注册成功"}
 
 
 @app.post("/chat", response_model=ChatResponse)

@@ -82,3 +82,39 @@ class AuthService:
         self.session_store.create(session)
 
         return session
+
+    def register(
+        self,
+        user_id: str,
+        username: str,
+        password: str,
+        company_id: str,
+        roles: list[str] | None = None,
+    ) -> bool:
+        roles = roles or ["member"]
+
+        exists = self.user_store.get_by_id(user_id)
+        if exists is not None:
+            return False
+
+        company = self.company_reg.get(company_id)
+        if company is None:
+            return False
+
+        pwd_hash = PasswordService.hash_password(password)
+        new_user = UserRecord(
+            id=user_id,
+            username=username,
+            password_hash=pwd_hash,
+            status="active",
+        )
+
+        self.user_store.save([new_user])
+
+        self.membership_store.add_member(
+            user_id=user_id,
+            company_id=company_id,
+            roles=roles,
+        )
+
+        return True

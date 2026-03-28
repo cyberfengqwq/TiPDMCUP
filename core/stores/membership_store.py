@@ -125,3 +125,27 @@ class MembershipStore(BaseJsonStore):
             self.write_json_atomic(self.raw_data)
 
             self.reload_index()
+
+    def add_member(self, user_id: str, company_id: str, roles: list[str]) -> None:
+        with self._lock:
+            raw: list[dict] = self.read_json()
+
+            for item in raw:
+                if (
+                    item.get("user_id") == user_id
+                    and item.get("company_id") == company_id
+                ):
+                    item["roles"] = roles
+                    self.write_json_atomic(raw)
+                    self.reload_index()
+                    return
+
+            raw.append(
+                {
+                    "user_id": user_id,
+                    "company_id": company_id,
+                    "roles": roles,
+                }
+            )
+            self.write_json_atomic(raw)
+            self.reload_index()
