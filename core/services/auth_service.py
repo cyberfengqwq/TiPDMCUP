@@ -91,6 +91,19 @@ class AuthService:
         company_id: str,
         roles: list[str] | None = None,
     ) -> bool:
+        """
+        给新用户提供注册服务
+        Args:
+            user_id             : str 用户 ID
+            username            : str 用户名
+            password            : str 密码
+            company_id          : str 公司 ID
+            roles               : list[str] [职务, ...]
+
+        Returns:
+            True                : 注册成功
+            False               : 注册失败 用户已存在或公司不存在
+        """
         roles = roles or ["member"]
 
         exists = self.user_store.get_by_id(user_id)

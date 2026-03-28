@@ -26,10 +26,10 @@ app = FastAPI(title="ticup", version="1.0.0")
 bearer_scheme = HTTPBearer(auto_error=False)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-USER_JSON = PROJECT_ROOT / "data/users.json"
-COMPANY_JSON = PROJECT_ROOT / "data/companies.json"
-MEMBERSHIP_JSON = PROJECT_ROOT / "data/memberships.json"
-SESSION_JSON = PROJECT_ROOT / "data/sessions.json"
+USER_JSON = PROJECT_ROOT / "data" / "users.json"
+COMPANY_JSON = PROJECT_ROOT / "data" / "companies.json"
+MEMBERSHIP_JSON = PROJECT_ROOT / "data" / "memberships.json"
+SESSION_JSON = PROJECT_ROOT / "data" / "sessions.json"
 
 
 user_store = UserStore(USER_JSON)
@@ -49,6 +49,10 @@ auth_service = AuthService(
 
 
 class LoginRequest(BaseModel):
+    """
+    用于接受登陆请求
+    """
+
     user_id: str = Field(
         ..., description="用户ID（当前 AuthService.login 使用 user_id）"
     )
@@ -57,6 +61,10 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
+    """
+    用于发送登陆请求
+    """
+
     session_id: str
     user_id: str
     company_id: str
@@ -65,6 +73,10 @@ class LoginResponse(BaseModel):
 
 
 class RegisterRequest(BaseModel):
+    """
+    接受注册请求
+    """
+
     user_id: str = Field(..., description="用户 ID")
     username: str = Field(..., description="用户名")
     password: str = Field(..., min_length=6, description="密码")
@@ -72,20 +84,36 @@ class RegisterRequest(BaseModel):
 
 
 class ChatRequest(BaseModel):
+    """
+    接受对话请求
+    """
+
     prompt: str
     chat_id: str = Field(..., description="前端对话窗口ID")
     is_end: bool = Field(False, description="是否结束本次会话（用于触发画像更新）")
 
 
 class ChatResponse(BaseModel):
+    """
+    对话回复
+    """
+
     answer: str
 
 
 class LogoutRequest(BaseModel):
+    """
+    用户注销
+    """
+
     session_id: str | None = None
 
 
 class MeResponse(BaseModel):
+    """
+    生命周期
+    """
+
     session_id: str
     user_id: str
     company_id: str
@@ -96,6 +124,26 @@ class MeResponse(BaseModel):
 def get_current_session(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> SessionPrincipal:
+    """获取现在活跃的 session
+    Args:
+       credentials          : HTTPAuthorizationCredentials = Depends(bearer_scheme) 用户登录验证机制
+
+    Returns:
+        SessionPrincipal    : 返回生命周期对象
+
+    Raise:
+        HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="缺失权限：Bearer <session_id>",
+        )                   : 无权限
+
+        HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired session",
+        )                   : 非法实例
+
+    """
+
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -211,7 +211,7 @@ class UserRetrieval(Retrieval):
                 }
             )
 
-        config_dir = Path(__file__) / "config"
+        config_dir = Path(__file__).resolve().parent.parent / "config"
         history_file = (
             config_dir / f"{self.user}_history_db.json"
             if self.user

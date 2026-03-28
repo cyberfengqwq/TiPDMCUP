@@ -40,7 +40,7 @@ class BaseJsonStore:
 
         """
         with self._lock:
-            temp_dir: Path = self.file_path / "temp"
+            temp_dir: Path = self.file_path.parent / "temp"
             temp_dir.mkdir(parents=True, exist_ok=True)
             fd, temp_str = tempfile.mkstemp(
                 dir=str(temp_dir), prefix=f"{self.file_path.stem}_", suffix=".tmp"

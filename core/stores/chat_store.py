@@ -9,7 +9,7 @@ ROOT_DIR: Path = Path.cwd()
 
 class ChatStore(BaseJsonStore):
     def __init__(self, chat_id: str) -> None:
-        super().__init__(str(ROOT_DIR / f"{chat_id}.json"))
+        super().__init__(str(ROOT_DIR / "data" / "chats" / f"{chat_id}.json"))
 
     def get_history(self) -> list[dict]:
         """读取历史会话
