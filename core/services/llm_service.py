@@ -27,7 +27,7 @@ class LLM:
                      不要输出任何解释，只能输出纯 SQL 语句！"
         """
 
-        self.model = "qwen3.5-flash"
+        self.model = "qwen3.5-plus"
 
     def chat(self, prompt: str) -> str:
         self.prompt = prompt

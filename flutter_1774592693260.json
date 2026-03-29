@@ -1,0 +1,18 @@
+[
+    {
+        "role": "user",
+        "content": "我司今年上半年的利润是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT report_period, total_profit FROM income_sheet WHERE stock_abbr = 'YOUR_COMPANY' AND report_period LIKE '2024%' AND report_period LIKE '%06%' ORDER BY report_period DESC LIMIT 1;"
+    },
+    {
+        "role": "user",
+        "content": "去年的呢"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT stock_abbr, total_profit FROM income_sheet WHERE report_year = '2023' ORDER BY total_profit DESC LIMIT 10;"
+    }
+]

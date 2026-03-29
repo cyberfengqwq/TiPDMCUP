@@ -8,5 +8,15 @@
         ],
         "issued_at": "2026-03-27T01:50:57.048221+00:00",
         "expires_at": "2026-03-27T03:50:57.048221+00:00"
+    },
+    {
+        "session_id": "0b9969b2-bfd9-4f02-9cec-3c5c91c5dd2b",
+        "user_id": "u_test_001",
+        "active_company_id": "c_test_001",
+        "roles": [
+            "analyst"
+        ],
+        "issued_at": "2026-03-27T06:24:53.208333+00:00",
+        "expires_at": "2026-03-27T08:24:53.208333+00:00"
     }
 ]

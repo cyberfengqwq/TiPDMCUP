@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "我司2024年第二季度的营收是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT total_operating_revenue FROM income_sheet WHERE report_period = '2024-06-30';"
+    }
+]
