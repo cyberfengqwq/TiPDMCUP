@@ -324,13 +324,13 @@ class DualRetrieval:
         self.user_id = user_id
         self.company_id = company_id
 
-        user_store_path: Path = (
-            ROOT_DIR / "data" / "users" / f"{user_id}" / "faiss_history"
-        )
+        user_store_path: Path = ROOT_DIR / "data" / "users"
         user_store_path.mkdir(exist_ok=True, parents=True)
 
         self.user_retrieval = UserRetrieval(
-            model_name=model_name, persist_root=str(user_store_path), user=user_id
+            model_name=model_name,
+            persist_root=str(user_store_path),
+            user=user_id,
         )
 
         with DualRetrieval._lock:

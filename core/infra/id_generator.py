@@ -1,4 +1,4 @@
-# core/infra/id_genertor.py
+# core/infra/id_generator.py
 
 import uuid
 
