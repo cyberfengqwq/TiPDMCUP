@@ -1,14 +1,15 @@
 # core/agent/pipeline.py
 
 
-from logging import Logger
+import logging
 
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.sql_retriever import DualRetrieval
 from core.services.llm_service import LLM
 from core.stores.chat_store import ChatStore
 
-logger = Logger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Agent:

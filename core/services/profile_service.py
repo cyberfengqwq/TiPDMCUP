@@ -7,6 +7,7 @@ from core.services.llm_service import LLM
 from core.stores.chat_store import ChatStore
 from core.stores.profile_store import ProfileStore
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

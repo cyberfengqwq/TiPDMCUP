@@ -8,6 +8,7 @@ import faiss
 
 from core.rag.sql_retriever import Retrieval
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 ROOT_DIR: Path = Path.cwd()
