@@ -33,8 +33,8 @@ class MetricRecord:
     stock_abbr: str | None = None
 
     unit: str | None = None
-    confidence: str | None = None
-    source_page: str | None = None
+    confidence: float = 0.0
+    source_page: int | None = None
     source_text: str | None = None
 
 

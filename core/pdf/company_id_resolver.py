@@ -45,18 +45,37 @@ def _extract_stock_code_from_text_first_pages(
         return None
     return None
 
-    def resolve_company_id(
-        pdf_path: str | Path,
-        stock_code: str | None,
-        prefer_stock_code_as_company_id: bool = True,
-    ) -> str:
-        """统一公司 ID 获取接口
 
-        Args:
-            pdf_path (str | Path) : PDF 文件路径
-            stock_code (str | None) ： 股票代码
-            prefer_stock_code_as_company_id (bool) : 防止要求用“公司名称”或者“文件夹名字”做公司代称
+def resolve_company_id(
+    pdf_path: str | Path,
+    stock_code: str | None,
+    prefer_stock_code_as_company_id: bool = True,
+) -> str:
+    """统一公司 ID 获取接口
 
-        Return：
-            str ： 公司代称
-        """
+    Args:
+        pdf_path (str | Path) : PDF 文件路径
+        stock_code (str | None) ： 股票代码
+        prefer_stock_code_as_company_id (bool) : 防止要求用“公司名称”或者“文件夹名字”做公司代称
+
+    Return：
+        str ： 公司代称
+    """
+
+    p = Path(pdf_path)
+
+    # 1. 允许直接传入正确的股票代码
+    if stock_code:
+        return stock_code.strip()
+
+    # 2. 从文件名中提取
+    code = _extract_stock_code_from_filename(p)
+    if code:
+        return code if prefer_stock_code_as_company_id else p.parent.name
+
+    # 3. 从前 3 页 PDF 中提取
+    code = _extract_stock_code_from_text_first_pages(p)
+    if code:
+        return code if prefer_stock_code_as_company_id else p.parent.name
+
+    return p.parent.name
