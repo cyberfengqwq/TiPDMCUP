@@ -344,6 +344,8 @@ class DualRetrieval:
 
         self.field_retrieval = DualRetrieval._field_retrievals[company_id]
 
+        logger.info(f"[UserMeta] write path = {self.user_retrieval.meta_path}")
+
     def retrieve(
         self, query: str, top_k_questions: int = 3, top_k_fields: int = 5
     ) -> Dict:

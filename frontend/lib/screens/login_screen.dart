@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'register_screen.dart';
 import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -126,6 +127,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                       : const Text("登录", style: TextStyle(fontSize: 16)),
                 ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                        );
+                      },
+                child: const Text('没有账号？去注册用户或公司'),
               ),
             ],
           ),

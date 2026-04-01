@@ -58,6 +58,7 @@ class LoginRequest(BaseModel):
     )
     password: str
     company_id: str | None = Field(None, description="公司ID（推荐字段）")
+    compay_id: str | None = Field(None, description="兼容历史字段")
 
 
 class LoginResponse(BaseModel):
@@ -81,6 +82,13 @@ class RegisterRequest(BaseModel):
     username: str = Field(..., description="用户名")
     password: str = Field(..., min_length=6, description="密码")
     company_id: str = Field(..., description="公司 ID")
+
+
+class RegisterCompanyRequest(BaseModel):
+    """接受公司注册请求"""
+
+    company_id: str = Field(..., description="公司 ID")
+    company_name: str = Field(..., description="公司名称")
 
 
 class ChatRequest(BaseModel):
@@ -163,7 +171,7 @@ def get_current_session(
 
 @app.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest) -> LoginResponse:
-    company_id = (payload.company_id or payload.company_id or "").strip()
+    company_id = (payload.company_id or payload.compay_id or "").strip()
     if not company_id:
         raise HTTPException(status_code=400, detail="company_id is required")
 
@@ -208,6 +216,19 @@ def register(payload: RegisterRequest) -> dict | None:
     if not ok:
         raise HTTPException(status_code=400, detail="注册失败！用户已存在或公司不存在")
     return {"ok": True, "message": "注册成功"}
+
+
+@app.post("/register/company")
+def register_company(payload: RegisterCompanyRequest) -> dict:
+    ok = auth_service.register_company(
+        company_id=payload.company_id,
+        company_name=payload.company_name,
+    )
+
+    if not ok:
+        raise HTTPException(status_code=400, detail="注册公司失败！公司ID已存在")
+
+    return {"ok": True, "message": "公司注册成功"}
 
 
 @app.post("/chat", response_model=ChatResponse)

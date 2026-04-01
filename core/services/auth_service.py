@@ -110,6 +110,9 @@ class AuthService:
         if exists is not None:
             return False
 
+        if self.user_store.get_by_username(username) is not None:
+            return False
+
         company = self.company_reg.get(company_id)
         if company is None:
             return False
@@ -129,5 +132,29 @@ class AuthService:
             company_id=company_id,
             roles=roles,
         )
+
+        return True
+
+    def register_company(self, company_id: str, company_name: str) -> bool:
+        """注册新公司
+        Args:
+            company_id      : str 公司 ID
+            company_name    : str 公司名
+
+        Returns:
+            bool            : True 注册成功 / False 公司已存在
+        """
+
+        if self.company_reg.get(company_id) is not None:
+            return False
+
+        new_company = Company(
+            id=company_id,
+            name=company_name,
+            status="active",
+            created_at=datetime.now(UTC),
+        )
+        self.company_store.update(new_company)
+        self.company_reg.reload()
 
         return True
