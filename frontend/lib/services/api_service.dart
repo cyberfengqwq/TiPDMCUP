@@ -40,8 +40,21 @@ class LoginResult {
   });
 }
 
+class ActionResult {
+  final bool success;
+  final String message;
+
+  const ActionResult({
+    required this.success,
+    required this.message,
+  });
+}
+
 class ApiService {
-  static const String baseUrl = 'http://101.37.80.57:1516';
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://101.37.80.57:1516',
+  );
   static SessionInfo? _currentSession;
 
   static SessionInfo? get currentSession => _currentSession;
@@ -158,6 +171,86 @@ class ApiService {
     } catch (_) {
       _currentSession = null;
       return false;
+    }
+  }
+
+  static Future<ActionResult> registerUser({
+    required String companyId,
+    required String userId,
+    required String username,
+    required String password,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'company_id': companyId,
+          'user_id': userId,
+          'username': username,
+          'password': password,
+        }),
+      );
+
+      final decodedBody = utf8.decode(response.bodyBytes);
+      Map<String, dynamic>? data;
+      try {
+        data = jsonDecode(decodedBody) as Map<String, dynamic>;
+      } catch (_) {
+        data = null;
+      }
+
+      if (response.statusCode == 200) {
+        return ActionResult(
+          success: true,
+          message: data?['message']?.toString() ?? '注册成功',
+        );
+      }
+
+      return ActionResult(
+        success: false,
+        message: data?['detail']?.toString() ?? '注册失败，状态码: ${response.statusCode}',
+      );
+    } catch (e) {
+      return ActionResult(success: false, message: '网络请求发生错误: $e');
+    }
+  }
+
+  static Future<ActionResult> registerCompany({
+    required String companyId,
+    required String companyName,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/register/company'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'company_id': companyId,
+          'company_name': companyName,
+        }),
+      );
+
+      final decodedBody = utf8.decode(response.bodyBytes);
+      Map<String, dynamic>? data;
+      try {
+        data = jsonDecode(decodedBody) as Map<String, dynamic>;
+      } catch (_) {
+        data = null;
+      }
+
+      if (response.statusCode == 200) {
+        return ActionResult(
+          success: true,
+          message: data?['message']?.toString() ?? '公司注册成功',
+        );
+      }
+
+      return ActionResult(
+        success: false,
+        message: data?['detail']?.toString() ?? '公司注册失败，状态码: ${response.statusCode}',
+      );
+    } catch (e) {
+      return ActionResult(success: false, message: '网络请求发生错误: $e');
     }
   }
 }

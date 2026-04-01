@@ -1,6 +1,6 @@
 # core/stores/membership_store.py
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from core.domain.models import Membership
@@ -129,6 +129,7 @@ class MembershipStore(BaseJsonStore):
     def add_member(self, user_id: str, company_id: str, roles: list[str]) -> None:
         with self._lock:
             raw: list[dict] = self.read_json()
+            now_iso = datetime.now(timezone.utc).isoformat()
 
             for item in raw:
                 if (
@@ -136,6 +137,8 @@ class MembershipStore(BaseJsonStore):
                     and item.get("company_id") == company_id
                 ):
                     item["roles"] = roles
+                    if not item.get("joined_at"):
+                        item["joined_at"] = now_iso
                     self.write_json_atomic(raw)
                     self.reload_index()
                     return
@@ -145,6 +148,7 @@ class MembershipStore(BaseJsonStore):
                     "user_id": user_id,
                     "company_id": company_id,
                     "roles": roles,
+                    "joined_at": now_iso,
                 }
             )
             self.write_json_atomic(raw)
