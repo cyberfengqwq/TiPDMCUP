@@ -254,6 +254,8 @@ class UserRetrieval(Retrieval):
                 self.index.add(embedding)  # type: ignore
                 logging.info(f"已添加用户问题: {question[:50]}...")
 
+                self.save_index()
+
     def search_similar_questions(self, query: str, top_k: int = 3) -> List[Dict]:
         """搜索相似的历史问题"""
         return self.search(query, top_k)
@@ -345,6 +347,7 @@ class DualRetrieval:
         self.field_retrieval = DualRetrieval._field_retrievals[company_id]
 
         logger.info(f"[UserMeta] write path = {self.user_retrieval.meta_path}")
+        logger.info(f"user_meta_path = {self.user_retrieval.meta_path}")
 
     def retrieve(
         self, query: str, top_k_questions: int = 3, top_k_fields: int = 5

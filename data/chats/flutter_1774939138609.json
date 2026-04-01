@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "今年上半年的营收是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT stock_abbr, total_operating_revenue FROM income_sheet WHERE report_period LIKE '2024-06%'"
+    }
+]

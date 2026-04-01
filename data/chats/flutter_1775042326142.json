@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "我司2024年上半年收入是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT total_operating_revenue FROM income_sheet WHERE report_period LIKE '2024%'"
+    }
+]

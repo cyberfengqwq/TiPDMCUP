@@ -6,5 +6,12 @@
             "analyst"
         ],
         "joined_at": "2026-03-27T00:00:00+00:00"
+    },
+    {
+        "user_id": "qwq",
+        "company_id": "c_test_001",
+        "roles": [
+            "member"
+        ]
     }
 ]

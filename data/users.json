@@ -4,5 +4,11 @@
         "username": "测试用户",
         "password_hash": "$2b$12$oKVYEoqRrlYcWI4Eyj96Y.BccPtM0RXCh7wXi6R3kQHtzBKwrywq.",
         "status": "active"
+    },
+    {
+        "id": "qwq",
+        "username": "qwq",
+        "password_hash": "$2b$12$BQsbtfUY4UH0AoAzD6zD/.au9xl2Gbv0YnMEBz3IbepGrImCpeW0.",
+        "status": "active"
     }
 ]
