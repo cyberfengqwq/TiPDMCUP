@@ -26,10 +26,10 @@ app = FastAPI(title="ticup", version="1.0.0")
 bearer_scheme = HTTPBearer(auto_error=False)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-USER_JSON = PROJECT_ROOT / "data" / "users.json"
-COMPANY_JSON = PROJECT_ROOT / "data" / "companies.json"
-MEMBERSHIP_JSON = PROJECT_ROOT / "data" / "memberships.json"
-SESSION_JSON = PROJECT_ROOT / "data" / "sessions.json"
+USER_JSON = PROJECT_ROOT / "data" / "db" / "users.json"
+COMPANY_JSON = PROJECT_ROOT / "data" / "db" / "companies.json"
+MEMBERSHIP_JSON = PROJECT_ROOT / "data" / "db" / "memberships.json"
+SESSION_JSON = PROJECT_ROOT / "data" / "db" / "sessions.json"
 
 
 user_store = UserStore(USER_JSON)

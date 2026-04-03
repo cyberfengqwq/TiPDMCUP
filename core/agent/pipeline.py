@@ -18,7 +18,7 @@ class Agent:
         self.company_id = company_id
         self.chat_id = chat_id
 
-        self.rag = DualRetrieval(user_id=user_id)
+        self.rag = DualRetrieval(user_id=user_id, company_id=company_id)
         self.memory = UserProfileRetrieval(user_id=user_id)
         self.chat_store = ChatStore(chat_id=chat_id)
         self.llm = LLM()
