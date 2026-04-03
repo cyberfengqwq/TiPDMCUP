@@ -1,0 +1,18 @@
+[
+    {
+        "role": "user",
+        "content": "2024年收入是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT SUM(operating_revenue) FROM income_sheet WHERE report_period LIKE '2024%';"
+    },
+    {
+        "role": "user",
+        "content": "2024年营收较去年增长多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT stock_abbr, operating_revenue_yoy_growth FROM income_sheet WHERE report_period LIKE '2024%';"
+    }
+]

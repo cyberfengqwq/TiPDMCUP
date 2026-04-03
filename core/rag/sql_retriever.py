@@ -34,7 +34,14 @@ class Retrieval:
     ) -> None:
         # 初始化模型与参数
         self.model_name = model_name
-        self.embedding = HuggingFaceEmbeddings(model_name=model_name)
+        self.embedding = HuggingFaceEmbeddings(
+            model_name=model_name,
+            model_kwargs={
+                "device": "cuda",
+                "local_files_only": True,  # 强制只读本地，不联网
+                "revision": "main",  # 锁定主分支，防止它去扫描 PR 分支
+            },
+        )
         self.dimension = dimension
 
         self._lock: Optional[threading.Lock] = None

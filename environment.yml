@@ -1,44 +1,44 @@
 name: ticup
 channels:
-  - pytorch
-  - nvidia
-  - conda-forge
-  - defaults
+    - pytorch
+    - nvidia
+    - conda-forge
+    - defaults
 
 dependencies:
-  - python=3.11
-  - pip
+    - python=3.11
+    - pip
 
-  # ===== PyTorch GPU (CUDA 12.1) =====
-  - pytorch::pytorch
-  - pytorch::torchvision
-  - pytorch::pytorch-cuda=12.1
+    # ===== PyTorch GPU (CUDA 12.1) =====
+    - pytorch::pytorch
+    - pytorch::torchvision
+    - pytorch::pytorch-cuda=12.1
 
-  # ===== Vector / Data =====
-  # faiss 在 conda-forge 通常是 CPU 版；GPU 版在不同平台可用性不稳定
-  - faiss-cpu
-  - numpy<2
-  - pandas
-  - sqlalchemy
-  - pymysql
-  - pypika
+    # ===== Vector / Data =====
+    # faiss 在 conda-forge 通常是 CPU 版；GPU 版在不同平台可用性不稳定
+    - faiss-cpu
+    - numpy<2
+    - pandas
+    - sqlalchemy
+    - pymysql
+    - pypika
 
-  # ===== Web / API =====
-  - fastapi
-  - pydantic
+    # ===== Web / API =====
+    - fastapi
+    - pydantic
 
-  # ===== Python ecosystem via pip =====
-  - pip:
-      - uvicorn[standard]
-      - transformers
-      - sentence-transformers
-      - langchain
-      - langchain-community
-      - langchain-core
-      - langchain-openai
-      - langchain-huggingface
-      - langgraph
-      - pyecharts
-      - pdfplumber
-      - httpx[socks]
-      - bcrypt
+    # ===== Python ecosystem via pip =====
+    - pip:
+          - uvicorn[standard]
+          - transformers
+          - sentence- -transformers
+          - langchain
+          - langchain-community
+          - langchain-core
+          - langchain-openai
+          - langchain-huggingface
+          - langgraph
+          - pyecharts
+          - pdfplumber
+          - httpx[socks]
+          - bcrypt

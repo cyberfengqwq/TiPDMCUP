@@ -13,5 +13,13 @@
         "roles": [
             "member"
         ]
+    },
+    {
+        "user_id": "yyf",
+        "company_id": "test",
+        "roles": [
+            "member"
+        ],
+        "joined_at": "2026-04-03T03:03:08.901302+00:00"
     }
 ]

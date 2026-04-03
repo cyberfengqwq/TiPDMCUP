@@ -115,6 +115,7 @@ class LogoutRequest(BaseModel):
     """
 
     session_id: str | None = None
+    chat_id: str | None = None
 
 
 class MeResponse(BaseModel):
@@ -257,9 +258,16 @@ def chat(
 @app.post("/logout")
 def logout(
     payload: LogoutRequest,
-    current_session=Depends(get_current_session),
-):
+    background_tasks: BackgroundTasks,
+    current_session: SessionPrincipal = Depends(get_current_session),
+) -> dict:
+    user_id = current_session.user_id
     target_session_id = payload.session_id or current_session.session_id
+
+    if payload.chat_id:
+        profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
+        background_tasks.add_task(profile_service.sum_and_update_profile)
+
     session_store.revoke(target_session_id)
     return {"ok": True}
 
