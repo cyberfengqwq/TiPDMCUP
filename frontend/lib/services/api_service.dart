@@ -150,7 +150,7 @@ class ApiService {
     }
   }
 
-  static Future<bool> logout() async {
+  static Future<bool> logout({String? chatId}) async {
     final sessionId = _currentSession?.sessionId;
     if (sessionId == null || sessionId.isEmpty) {
       _currentSession = null;
@@ -164,7 +164,9 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $sessionId',
         },
-        body: jsonEncode({}),
+        body: jsonEncode({
+          'chat_id' : ?chatId,
+        }),
       );
       _currentSession = null;
       return response.statusCode == 200;
