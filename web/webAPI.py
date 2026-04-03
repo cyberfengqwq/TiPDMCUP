@@ -9,7 +9,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 from starlette import status
 
-from core.agent.pipeline import Agent
+from core.agent.agent_manager import agent_manager
 from core.domain.models import SessionPrincipal
 from core.services.auth_service import AuthService
 from core.services.company_registry import CompanyRegistry
@@ -241,7 +241,7 @@ def chat(
     user_id: str = current_session.user_id
     company_id: str = current_session.active_company_id
 
-    agent = Agent(
+    agent = agent_manager.get_or_create(
         user_id=user_id,
         company_id=company_id,
         chat_id=payload.chat_id,
@@ -249,6 +249,7 @@ def chat(
     answer = agent.run(payload.prompt)
 
     if payload.is_end:
+        agent_manager.destroy(payload.chat_id)
         profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
         background_tasks.add_task(profile_service.sum_and_update_profile)
 
@@ -265,6 +266,7 @@ def logout(
     target_session_id = payload.session_id or current_session.session_id
 
     if payload.chat_id:
+        agent_manager.destroy(payload.chat_id)
         profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
         background_tasks.add_task(profile_service.sum_and_update_profile)
 

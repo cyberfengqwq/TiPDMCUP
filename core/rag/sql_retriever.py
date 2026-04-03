@@ -261,8 +261,6 @@ class UserRetrieval(Retrieval):
                 self.index.add(embedding)  # type: ignore
                 logging.info(f"已添加用户问题: {question[:50]}...")
 
-                self.save_index()
-
     def search_similar_questions(self, query: str, top_k: int = 3) -> List[Dict]:
         """搜索相似的历史问题"""
         return self.search(query, top_k)
@@ -381,9 +379,8 @@ class DualRetrieval:
         }
 
     def add_user_interaction(self, question: str, sql: str):
-        """添加用户交互记录"""
+        """添加用户交互记录（不立即保存，在会话结束时统一保存）"""
         self.user_retrieval.add_user_question(question, sql)
-        self.user_retrieval.save_index()
 
     def get_all_tables(self) -> List[str]:
         """获取所有表名"""
