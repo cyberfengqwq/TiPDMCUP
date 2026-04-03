@@ -269,6 +269,8 @@ def logout(
         agent_manager.destroy(payload.chat_id)
         profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
         background_tasks.add_task(profile_service.sum_and_update_profile)
+    else:
+        agent_manager.destroy_user_agents(user_id)
 
     session_store.revoke(target_session_id)
     return {"ok": True}
