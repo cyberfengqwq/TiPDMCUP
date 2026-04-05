@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "2024年收入是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT SUM(operating_profit) FROM income_sheet WHERE report_period LIKE '2024%';"
+    }
+]

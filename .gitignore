@@ -1,4 +1,8 @@
 .env
-
 .zed/
 .vscode/
+
+models/
+*.bin
+*.safetensors
+*.gguf

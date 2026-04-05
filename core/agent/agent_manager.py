@@ -4,7 +4,6 @@ import logging
 import threading
 import time
 from dataclasses import dataclass
-from typing import Dict, Optional, Set
 
 from core.agent.pipeline import Agent
 
@@ -31,7 +30,7 @@ class AgentManager:
     - 支持超时自动保存和清理
     """
 
-    _instance: Optional["AgentManager"] = None
+    _instance: "AgentManager | None" = None
     _lock = threading.Lock()
 
     # 超时配置（单位：秒）
@@ -43,19 +42,27 @@ class AgentManager:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
-                    cls._instance._agents: Dict[str, AgentEntry] = {}
-                    cls._instance._user_chats: Dict[str, Set[str]] = {}  # user_id -> set of chat_ids
-                    cls._instance._agents_lock = threading.Lock()
-                    cls._instance._cleanup_thread: Optional[threading.Thread] = None
-                    cls._instance._running = False
-                    cls._instance._start_cleanup_thread()
         return cls._instance
+
+    def __init__(self) -> None:
+        if getattr(self, "_initialized", False):
+            return
+
+        self._agents: dict[str, AgentEntry] = {}
+        self._user_chats: dict[str, set[str]] = {}  # user_id -> set of chat_ids
+        self._agents_lock = threading.Lock()
+        self._cleanup_thread: threading.Thread | None = None
+        self._running: bool = False
+        self._initialized: bool = True
+        self._start_cleanup_thread()
 
     def _start_cleanup_thread(self) -> None:
         """启动后台清理线程"""
         if self._cleanup_thread is None or not self._cleanup_thread.is_alive():
             self._running = True
-            self._cleanup_thread = threading.Thread(target=self._cleanup_loop, daemon=True)
+            self._cleanup_thread = threading.Thread(
+                target=self._cleanup_loop, daemon=True
+            )
             self._cleanup_thread.start()
             logger.info("[AgentManager] 后台清理线程已启动")
 
@@ -160,10 +167,12 @@ class AgentManager:
             chat_ids = self._user_chats.get(user_id, set()).copy()
 
         for chat_id in chat_ids:
-            logger.info(f"[AgentManager] 用户退出，销毁 Agent: user_id={user_id}, chat_id={chat_id}")
+            logger.info(
+                f"[AgentManager] 用户退出，销毁 Agent: user_id={user_id}, chat_id={chat_id}"
+            )
             self.destroy(chat_id)
 
-    def get(self, chat_id: str) -> Optional[Agent]:
+    def get(self, chat_id: str) -> Agent | None:
         """
         获取 Agent 实例
 
@@ -207,7 +216,9 @@ class AgentManager:
             with self._agents_lock:
                 entry = self._agents.get(chat_id)
                 if entry:
-                    logger.info(f"[AgentManager] 保存用户向量库: user_id={user_id}, chat_id={chat_id}")
+                    logger.info(
+                        f"[AgentManager] 保存用户向量库: user_id={user_id}, chat_id={chat_id}"
+                    )
                     entry.agent.rag.user_retrieval.save_index()
 
     def clear_all(self) -> None:
