@@ -3,6 +3,7 @@
 
 import logging
 
+from core.agent.intent_manager import IntentGatekeeper
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.sql_retriever import DualRetrieval
 from core.services.llm_service import LLM
@@ -22,6 +23,7 @@ class Agent:
         self.memory = UserProfileRetrieval(user_id=user_id)
         self.chat_store = ChatStore(chat_id=chat_id)
         self.llm = LLM()
+        self.intent = IntentGatekeeper()
 
     def build_prompt(self, question: str) -> str:
         rag_result: dict = self.rag.retrieve(question)
@@ -60,6 +62,12 @@ class Agent:
         return prompt.strip()
 
     def run(self, question: str) -> str:
+        history: str = ""
+        slots = self.intent.analyze(question, history)
+
+        if not slots.is_complete:
+            return f"-- 信息不足: {slots.missing_reason or '请补充公司、年份、报告期、指标'}"
+
         logger.info(f"用户输入自然语言：{question}")
 
         prompt = self.build_prompt(question)
