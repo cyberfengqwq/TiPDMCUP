@@ -25,6 +25,15 @@ class Agent:
         self.llm = LLM()
         self.intent = IntentGatekeeper()
 
+    def build_history_text(self, limit: int = 6) -> str:
+        history: list[dict] = self.chat_store.get_history()
+        if not history:
+            return ""
+        recent = history[-limit:]
+        return "\n".join(
+            [f"{m.get('role', 'unknown')}: {m.get('content', '')}" for m in recent]
+        )
+
     def build_prompt(self, question: str) -> str:
         rag_result: dict = self.rag.retrieve(question)
         similar_questions = rag_result.get("similar_questions", [])
@@ -62,7 +71,7 @@ class Agent:
         return prompt.strip()
 
     def run(self, question: str) -> str:
-        history: str = ""
+        history: str = self.build_history_text()
         slots = self.intent.analyze(question, history)
 
         if not slots.is_complete:
