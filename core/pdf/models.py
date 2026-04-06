@@ -23,19 +23,24 @@ class MetricRecord:
     指标记录：按行抽取后的标准单元
     """
 
-    table_name: str  # balance_sheet / income_sheet / cash_flow_sheet / core_performance_indicators_sheet
+    table_name: str  # 归属四大表的哪一个
     field_key: str  # schema key
-    value: object
+    value: object  # 该字段的值
 
-    report_period: str | None = None
-    report_year: str | None = None
-    stock_code: str | None = None
-    stock_abbr: str | None = None
+    report_period: str | None = None  # 报告期信息
+    report_year: str | None = None  # 报告期信息
 
-    unit: str | None = None
-    confidence: float = 0.0
-    source_page: int | None = None
-    source_text: str | None = None
+    # 新增：季度维度（中间层使用，不影响最终CSV schema）
+    report_type: str | None = None  # annual / semiannual / quarterly
+    report_quarter: str | None = None  # Q1 / Q2 / Q3 / Q4
+
+    stock_code: str | None = None  # 公司身份
+    stock_abbr: str | None = None  # 公司身份
+
+    unit: str | None = None  # 单位
+    confidence: float = 0.0  # 置信度
+    source_page: int | None = None  # 溯源信息
+    source_text: str | None = None  # 溯源信息
 
 
 @dataclass

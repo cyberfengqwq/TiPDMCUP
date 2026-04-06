@@ -10,7 +10,8 @@ def _to_pattern(label: str) -> str:
     return re.escape(label)
 
 
-# 可手动扩展同义词
+# 后续可手动扩展同义词
+# 全局字典，key: 元组；value: 列表
 MANUAL_ALIASES: dict[tuple[str, str], list[str]] = {
     ("balance_sheet", "liability_total_liabilities"): [r"总负债", r"负债合计"],
     ("balance_sheet", "equity_total_equity"): [r"所有者权益合计", r"股东权益合计"],
@@ -41,12 +42,14 @@ def build_field_patterns() -> dict[str, dict[str, list[str]]]:
     for table_name, field_map in DATABASE_SCHEMA_DICT.items():
         patterns[table_name] = {}
         for field_key, cn_label in field_map.items():
+            # 官方附件中的完整字段
             base = [_to_pattern(cn_label)]
-
+            # 上方人造含有正则表达式的模糊匹配字段
             extra = MANUAL_ALIASES.get((table_name, field_key), [])
-
+            # 官方字段 & 模糊匹配字段进行拼接，相当于在原有大字典的基础上加入中文方言字段
             patterns[table_name][field_key] = base + extra
     return patterns
 
 
+# 把 patterns 赋值给 ‘字段匹配规则’ 这个全局变量
 FIELD_PATTERNS: dict[str, dict[str, list[str]]] = build_field_patterns()
