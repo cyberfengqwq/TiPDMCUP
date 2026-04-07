@@ -26,6 +26,7 @@ class ProfileService:
             str: 用户个人画像描述
         """
         return self.profile_store.get_summary()
+    
 
     def sum_and_update_profile(self) -> str | None:
         chat_history: list[dict] = self.chat_store.get_history()
