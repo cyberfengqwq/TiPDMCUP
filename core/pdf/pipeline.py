@@ -1,5 +1,6 @@
 # core/pdf/pipeline.py
 
+import re
 from pathlib import Path
 
 from core.pdf.aggregator import metric_records_to_rows
@@ -19,17 +20,23 @@ def _infer_report_meta_from_filename(
       华润三九：2024年三季度报告.pdf
       华润三九：2024年半年度报告.pdf
       华润三九：2024年年度报告.pdf
+
+    Arg:
+        pdf_path (Path) : PDF 文件路径
+
+    Return:
+        report_period, report_year, report_quarter (tuple) : 报告默认日期；年份；季度
     """
+    # 去掉后缀，纯文件名
     name = pdf_path.stem
 
-    # 年份
+    # 用正则表达式抓 20 开头的四位数字，如果抓到，转换为 int 保存
     year_match = re.search(r"(20\d{2})", name)
     report_year = int(year_match.group(1)) if year_match else None
 
     report_quarter = None
     report_period = None
-
-    # 季度/半年度/年度识别
+    # 季度/半年度/年度识别，最后一个参数兼容小写
     if re.search(r"(一季度|第?一季|Q1)", name, re.IGNORECASE):
         report_quarter = "Q1"
     elif re.search(r"(半年度|中报|Q2)", name, re.IGNORECASE):

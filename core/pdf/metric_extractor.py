@@ -48,7 +48,7 @@ def extract_metric_records(
     stock_code: str,
     stock_abbr: str | None,
     report_period: str | None,
-    report_year: str | None,
+    report_year: int | None,
     report_type: str | None,
     report_quarter: str | None,
 ) -> list[MetricRecord]:

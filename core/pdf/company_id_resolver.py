@@ -48,7 +48,7 @@ def _extract_stock_code_from_text_first_pages(
 
 def resolve_company_id(
     pdf_path: str | Path,
-    stock_code: str | None,
+    stock_code: str | None = None,
     prefer_stock_code_as_company_id: bool = True,
 ) -> str:
     """统一公司 ID 获取接口

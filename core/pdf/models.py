@@ -28,7 +28,7 @@ class MetricRecord:
     value: object  # 该字段的值
 
     report_period: str | None = None  # 报告期信息
-    report_year: str | None = None  # 报告期信息
+    report_year: int | None = None  # 报告期信息
 
     # 新增：季度维度（中间层使用，不影响最终CSV schema）
     report_type: str | None = None  # annual / semiannual / quarterly
