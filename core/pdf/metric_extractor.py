@@ -29,18 +29,19 @@ def _to_number(x):
         return None
 
 
-def _pick_value(row: pd.Series):
+def _pick_value(row: pd.Series) -> list[float]:
     """
     从每行中提取数字
     """
+    values: list[float] = []
     # Loop_1: 遍历该行除第一列的所有单元格的内容
     for v in row.tolist()[1:]:
         # 将内容尝试洗成数字
         num = _to_number(v)
         # 只要找到靠左的数字，返回该 num，否则返回 None
         if num is not None:
-            return num
-    return None
+            values.append(num)
+    return values
 
 
 def extract_metric_records(
@@ -70,12 +71,15 @@ def extract_metric_records(
                 continue
 
             # 调用刚才写的 _pick_value() 函数
-            value = _pick_value(row)
+            values = _pick_value(row)
             # 若后续单元格没有金额，丢掉该行
-            if value is None:
+            if not values:
                 continue
 
+            value = values[0]
+
             # Loop_2.1.1: 遍历 “字段匹配规则字典”，四个大表名 & 中英文字段
+            matched = False
             for table_name, mapping in FIELD_PATTERNS.items():
                 # Loop_2.1.1.1: 遍历 英文字段名 以及 中文对照规则（base + extra）
                 for field_key, patterns in mapping.items():
@@ -100,5 +104,9 @@ def extract_metric_records(
                                 source_text=item_text,
                             )
                         )
+                        matched = True
+                        break
+                if matched:
+                    break
 
     return records

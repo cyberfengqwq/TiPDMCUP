@@ -81,6 +81,9 @@ class PDFPipeline:
             pdf_path
         )
 
+        if report_period is None and report_year is not None:
+            report_period = f"{report_year}-12-31"
+
         if report_quarter == "Q4":
             report_type = "annual"
         elif report_quarter == "Q2":
