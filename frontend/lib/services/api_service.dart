@@ -51,13 +51,22 @@ class ActionResult {
 }
 
 class ApiService {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://101.37.80.57:1516',
-  );
+  static const String baseUrl = 'http://101.37.80.57:1516';
+  static const Duration _timeout = Duration(seconds: 45);
   static SessionInfo? _currentSession;
+  static String? _activeChatId;
 
   static SessionInfo? get currentSession => _currentSession;
+
+  static void bindActiveChat(String chatId) {
+    _activeChatId = chatId;
+  }
+
+  static String _extractErrorMessage(Map<String, dynamic>? data, int statusCode, String fallback) {
+    return data?['detail']?.toString() ??
+        data?['message']?.toString() ??
+        '$fallback，状态码: $statusCode';
+  }
 
   static Future<LoginResult> login({
     required String companyId,
@@ -76,7 +85,7 @@ class ApiService {
           // 后端字段当前为 company_id（后端拼写如此）
           'company_id': companyId,
         }),
-      );
+      ).timeout(_timeout);
 
       final decodedBody = utf8.decode(response.bodyBytes);
       Map<String, dynamic>? data;
@@ -98,7 +107,7 @@ class ApiService {
 
       return LoginResult(
         success: false,
-        message: data?['detail']?.toString() ?? '登录失败，状态码: ${response.statusCode}',
+        message: _extractErrorMessage(data, response.statusCode, '登录失败'),
       );
     } catch (e) {
       return LoginResult(success: false, message: '网络请求发生错误: $e');
@@ -128,6 +137,8 @@ class ApiService {
         }),
       );
 
+      _activeChatId = chatId;
+
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         try {
@@ -140,7 +151,7 @@ class ApiService {
         final decodedBody = utf8.decode(response.bodyBytes);
         try {
           final jsonResponse = jsonDecode(decodedBody) as Map<String, dynamic>;
-          return jsonResponse['detail']?.toString() ?? '请求失败，状态码: ${response.statusCode}';
+          return _extractErrorMessage(jsonResponse, response.statusCode, '请求失败');
         } catch (_) {
           return '请求失败，状态码: ${response.statusCode}';
         }
@@ -152,8 +163,11 @@ class ApiService {
 
   static Future<bool> logout({String? chatId}) async {
     final sessionId = _currentSession?.sessionId;
+    final targetChatId = chatId ?? _activeChatId;
+
     if (sessionId == null || sessionId.isEmpty) {
       _currentSession = null;
+      _activeChatId = null;
       return true;
     }
 
@@ -165,13 +179,15 @@ class ApiService {
           'Authorization': 'Bearer $sessionId',
         },
         body: jsonEncode({
-          'chat_id' : ?chatId,
+          if (targetChatId != null && targetChatId.isNotEmpty) 'chat_id': targetChatId,
         }),
-      );
+      ).timeout(_timeout);
       _currentSession = null;
+      _activeChatId = null;
       return response.statusCode == 200;
     } catch (_) {
       _currentSession = null;
+      _activeChatId = null;
       return false;
     }
   }
@@ -192,7 +208,7 @@ class ApiService {
           'username': username,
           'password': password,
         }),
-      );
+      ).timeout(_timeout);
 
       final decodedBody = utf8.decode(response.bodyBytes);
       Map<String, dynamic>? data;
@@ -211,7 +227,7 @@ class ApiService {
 
       return ActionResult(
         success: false,
-        message: data?['detail']?.toString() ?? '注册失败，状态码: ${response.statusCode}',
+        message: _extractErrorMessage(data, response.statusCode, '注册失败'),
       );
     } catch (e) {
       return ActionResult(success: false, message: '网络请求发生错误: $e');
@@ -230,7 +246,7 @@ class ApiService {
           'company_id': companyId,
           'company_name': companyName,
         }),
-      );
+      ).timeout(_timeout);
 
       final decodedBody = utf8.decode(response.bodyBytes);
       Map<String, dynamic>? data;
@@ -249,7 +265,7 @@ class ApiService {
 
       return ActionResult(
         success: false,
-        message: data?['detail']?.toString() ?? '公司注册失败，状态码: ${response.statusCode}',
+        message: _extractErrorMessage(data, response.statusCode, '公司注册失败'),
       );
     } catch (e) {
       return ActionResult(success: false, message: '网络请求发生错误: $e');

@@ -19,9 +19,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isLoggingOut = true;
     });
 
-    await ApiService.logout();
+    final ok = await ApiService.logout();
 
     if (!context.mounted) return;
+
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('退出接口异常，已在本地清理会话')),
+      );
+    }
 
     Navigator.pushReplacement(
       context,
@@ -53,6 +59,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           Center(
             child: Text("所属机构：${widget.session.companyId}", style: const TextStyle(fontSize: 14, color: Colors.grey)),
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              "角色：${widget.session.roles.isEmpty ? 'member' : widget.session.roles.join(', ')}",
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              "会话到期：${widget.session.expiresAt}",
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
           const SizedBox(height: 16),
           ListTile(

@@ -80,6 +80,9 @@ def extract_metric_records(
                 # Loop_2.1.1.1: 遍历 英文字段名 以及 中文对照规则（base + extra）
                 for field_key, patterns in mapping.items():
                     # 与上一级循环提取的 "item_text"(表头) 对照，用正则去扫，若匹配就放入 records
+                    if field_key in {"report_period", "report_year"}:
+                        continue
+
                     if any(re.search(p, item_text) for p in patterns):
                         records.append(
                             MetricRecord(

@@ -1,6 +1,8 @@
 # core/pdf/pipeline.py
 
+import logging
 import re
+import shutil
 from pathlib import Path
 
 from core.pdf.aggregator import metric_records_to_rows
@@ -8,6 +10,9 @@ from core.pdf.company_id_resolver import resolve_company_id
 from core.pdf.exporter import SchemaExporter
 from core.pdf.metric_extractor import extract_metric_records
 from core.pdf.reader import PDFReader
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def _infer_report_meta_from_filename(
@@ -69,6 +74,7 @@ class PDFPipeline:
         stock_abbr: str | None = None,
     ) -> dict[str, list[dict]]:
         pdf_path = Path(pdf_path)
+        logger.info(f"开始处理{pdf_path}")
 
         stock_code = resolve_company_id(pdf_path)
         report_period, report_year, report_quarter = _infer_report_meta_from_filename(
@@ -93,12 +99,19 @@ class PDFPipeline:
             report_type=report_type,
             report_quarter=report_quarter,
         )
+        logger.info(f"完成处理{pdf_path}")
 
         return metric_records_to_rows(records)
 
     def process_company_folder(self, folder: str | Path, out_dir: str | Path) -> None:
         folder = Path(folder)
         out_dir = Path(out_dir)
+        company_id = folder.name
+
+        company_out_dir = out_dir / company_id
+        if company_out_dir.exists():
+            shutil.rmtree(company_out_dir)
+
         pdf_files = sorted(folder.glob("*.pdf"))
 
         aggregated = {
@@ -113,7 +126,6 @@ class PDFPipeline:
             for tname, rows in rows_by_table.items():
                 aggregated[tname].extend(rows)
 
-        company_id = folder.name
         for tname, rows in aggregated.items():
             # 去掉中间调试字段，确保严格 schema
             for r in rows:

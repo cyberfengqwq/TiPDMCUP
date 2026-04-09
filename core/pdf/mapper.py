@@ -13,26 +13,37 @@ def _to_pattern(label: str) -> str:
 # 后续可手动扩展同义词
 # 全局字典，key: 元组；value: 列表
 MANUAL_ALIASES: dict[tuple[str, str], list[str]] = {
-    ("balance_sheet", "liability_total_liabilities"): [r"总负债", r"负债合计"],
-    ("balance_sheet", "equity_total_equity"): [r"所有者权益合计", r"股东权益合计"],
-    ("balance_sheet", "asset_total_assets"): [r"总资产"],
-    ("balance_sheet", "asset_liability_ratio"): [r"资产负债率"],
+    ("income_sheet", "net_profit"): [
+        r"净利润(?!同比|环比)",
+        r"归属于.*净利润",
+        r"归母净利润",
+        r"归属于母公司股东的净利润",
+    ],
     ("income_sheet", "total_operating_revenue"): [
         r"营业总收入",
         r"营业收入(?!同比|环比)",
+        r"主营业务收入",
     ],
-    ("income_sheet", "net_profit"): [r"净利润(?!同比|环比)", r"归属于.*净利润"],
-    ("income_sheet", "total_profit"): [r"合并利润总额", r"利润总额"],
-    ("income_sheet", "operating_profit"): [r"营业利润"],
-    ("cash_flow_sheet", "operating_cf_net_amount"): [r"经营活动产生的现金流量净额"],
-    ("cash_flow_sheet", "investing_cf_net_amount"): [r"投资活动产生的现金流量净额"],
+    ("cash_flow_sheet", "net_cash_flow"): [
+        r"现金及现金等价物净增加额",
+        r"净现金流",
+    ],
+    ("cash_flow_sheet", "operating_cf_net_amount"): [
+        r"经营活动产生的现金流量净额",
+        r"经营活动现金流净额",
+    ],
+    ("cash_flow_sheet", "investing_cf_net_amount"): [
+        r"投资活动产生的现金流量净额",
+        r"投资活动现金流净额",
+    ],
     ("cash_flow_sheet", "financing_cf_net_amount"): [
-        r"(筹资|融资)活动产生的现金流量净额"
+        r"(筹资|融资)活动产生的现金流量净额",
+        r"(筹资|融资)活动现金流净额",
     ],
-    ("cash_flow_sheet", "net_cash_flow"): [r"现金及现金等价物净增加额", r"净现金流"],
-    ("core_performance_indicators_sheet", "eps"): [r"每股收益"],
-    ("core_performance_indicators_sheet", "roe"): [r"净资产收益率"],
-    ("core_performance_indicators_sheet", "net_asset_per_share"): [r"每股净资产"],
+    ("balance_sheet", "asset_total_assets"): [r"总资产"],
+    ("balance_sheet", "liability_total_liabilities"): [r"总负债", r"负债合计"],
+    ("balance_sheet", "equity_total_equity"): [r"所有者权益合计", r"股东权益合计"],
+    ("balance_sheet", "asset_liability_ratio"): [r"资产负债率"],
 }
 
 

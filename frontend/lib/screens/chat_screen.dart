@@ -8,7 +8,7 @@ import '../services/api_service.dart';
 class ChatScreen extends StatefulWidget {
   final SessionInfo session;
 
-  const ChatScreen({Key? key, required this.session}) : super(key: key);
+  const ChatScreen({super.key, required this.session});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -17,7 +17,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final String _chatId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
+  late final String _chatId;
   final List<ChatMessage> _messages = [
     ChatMessage(
       text: "你好！我是上市公司财报智能问数助手，请问有什么可以帮您？\n例如您能问：\n- 贵州茅台2023年的净利润是多少？\n- 对比下比亚迪和五粮液的研发投入占比。",
@@ -26,9 +26,16 @@ class _ChatScreenState extends State<ChatScreen> {
   ];
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _chatId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
+    ApiService.bindActiveChat(_chatId);
+  }
+
   void _sendMessage() async {
     final text = _textController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isLoading) return;
 
     _textController.clear();
     
