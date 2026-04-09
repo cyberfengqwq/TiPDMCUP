@@ -1,10 +1,14 @@
 # core/pdf/pipeline.py
 
+import json
 import logging
 import re
 import shutil
 from pathlib import Path
 
+import pandas as pd
+
+from config.db_schema import DATABASE_SCHEMA_DICT
 from core.pdf.aggregator import metric_records_to_rows
 from core.pdf.company_id_resolver import resolve_company_id
 from core.pdf.exporter import SchemaExporter
@@ -64,6 +68,90 @@ def _infer_report_meta_from_filename(
     return report_period, report_year, report_quarter
 
 
+def _nonnull_ratio(series: pd.Series) -> float:
+    if len(series) == 0:
+        return 0.0
+    nonnull = series.notna() & (series.astype(str).str.strip() != "")
+    return float(nonnull.sum()) / float(len(series))
+
+
+def _table_fill_report(df: pd.DataFrame, table_name: str) -> dict:
+    """
+    生成字段填充率报告：每列非空比例
+    """
+    report = {
+        "table_name": table_name,
+        "rows": int(len(df)),
+        "columns": int(len(df.columns)),
+        "fill_rate_by_col": {},
+        "avg_fill_rate": 0.0,
+    }
+
+    if df.empty:
+        return report
+
+    fill_rates = {}
+    for c in df.columns:
+        fill_rates[c] = round(_nonnull_ratio(df[c]), 4)
+
+    # 去掉主键/标识列后的“业务字段平均填充率”
+    biz_cols = [
+        c
+        for c in df.columns
+        if c
+        not in {
+            "serial_number",
+            "stock_code",
+            "stock_abbr",
+            "report_period",
+            "report_year",
+        }
+    ]
+    avg_fill = 0.0
+    if biz_cols:
+        avg_fill = float(sum(fill_rates[c] for c in biz_cols)) / float(len(biz_cols))
+
+    report["fill_rate_by_col"] = fill_rates
+    report["avg_fill_rate"] = round(avg_fill, 4)
+    return report
+
+
+def _warn_missing_key_fields(df: pd.DataFrame, table_name: str) -> None:
+    """
+    对关键字段做缺失告警（你可按业务继续加）
+    """
+    key_fields_map = {
+        "core_performance_indicators_sheet": [
+            "eps",
+            "total_operating_revenue",
+            "net_profit_10k_yuan",
+        ],
+        "balance_sheet": [
+            "asset_total_assets",
+            "liability_total_liabilities",
+            "equity_total_equity",
+        ],
+        "income_sheet": ["total_operating_revenue", "net_profit", "total_profit"],
+        "cash_flow_sheet": [
+            "net_cash_flow",
+            "operating_cf_net_amount",
+            "financing_cf_net_amount",
+        ],
+    }
+    fields = key_fields_map.get(table_name, [])
+    if df.empty:
+        logger.warning(f"[{table_name}] 空表，关键字段全部缺失")
+        return
+
+    for f in fields:
+        if f not in df.columns:
+            logger.warning(f"[{table_name}] 缺少字段列: {f}")
+            continue
+        ratio = _nonnull_ratio(df[f])
+        if ratio < 0.3:
+            logger.warning(f"[{table_name}] 关键字段填充率过低: {f}={ratio:.2%}")
+
+
 class PDFPipeline:
     def __init__(self) -> None:
         self.reader = PDFReader()
@@ -74,15 +162,12 @@ class PDFPipeline:
         stock_abbr: str | None = None,
     ) -> dict[str, list[dict]]:
         pdf_path = Path(pdf_path)
-        logger.info(f"开始处理{pdf_path}")
+        logger.info(f"开始处理 {pdf_path}")
 
         stock_code = resolve_company_id(pdf_path)
         report_period, report_year, report_quarter = _infer_report_meta_from_filename(
             pdf_path
         )
-
-        if report_period is None and report_year is not None:
-            report_period = f"{report_year}-12-31"
 
         if report_quarter == "Q4":
             report_type = "annual"
@@ -92,6 +177,7 @@ class PDFPipeline:
             report_type = "quarterly" if report_quarter in ("Q1", "Q3") else None
 
         raw_tables = self.reader.read_tables(pdf_path)
+        logger.info(f"[{pdf_path.name}] 读取原始表格数量: {len(raw_tables)}")
 
         records = extract_metric_records(
             raw_tables=raw_tables,
@@ -102,11 +188,21 @@ class PDFPipeline:
             report_type=report_type,
             report_quarter=report_quarter,
         )
-        logger.info(f"完成处理{pdf_path}")
+        logger.info(f"[{pdf_path.name}] 抽取指标记录数量: {len(records)}")
 
-        return metric_records_to_rows(records)
+        rows_by_table = metric_records_to_rows(records)
+        for tname, rows in rows_by_table.items():
+            logger.info(f"[{pdf_path.name}] 表={tname}, 聚合行数={len(rows)}")
 
-    def process_company_folder(self, folder: str | Path, out_dir: str | Path) -> None:
+        logger.info(f"完成处理 {pdf_path}")
+        return rows_by_table
+
+    def process_company_folder(
+        self,
+        folder: str | Path,
+        out_dir: str | Path,
+        dump_debug_report: bool = True,
+    ) -> None:
         folder = Path(folder)
         out_dir = Path(out_dir)
         company_id = folder.name
@@ -116,6 +212,7 @@ class PDFPipeline:
             shutil.rmtree(company_out_dir)
 
         pdf_files = sorted(folder.glob("*.pdf"))
+        logger.info(f"[{company_id}] 待处理 PDF 数量: {len(pdf_files)}")
 
         aggregated = {
             "core_performance_indicators_sheet": [],
@@ -129,6 +226,8 @@ class PDFPipeline:
             for tname, rows in rows_by_table.items():
                 aggregated[tname].extend(rows)
 
+        debug_reports: list[dict] = []
+
         for tname, rows in aggregated.items():
             # 去掉中间调试字段，确保严格 schema
             for r in rows:
@@ -136,5 +235,24 @@ class PDFPipeline:
 
             df = SchemaExporter.build_df(tname, rows)
             SchemaExporter.save_csv(
-                df, tname, out_dir / company_id / f"{company_id}_{tname}.csv"
+                df,
+                tname,
+                out_dir / company_id / f"{company_id}_{tname}.csv",
             )
+
+            # 统计报告
+            report = _table_fill_report(df, tname)
+            debug_reports.append(report)
+
+            logger.info(
+                f"[{company_id}] 导出完成: {tname}.csv | rows={report['rows']} | avg_fill_rate={report['avg_fill_rate']:.2%}"
+            )
+            _warn_missing_key_fields(df, tname)
+
+        # 可选导出 debug json
+        if dump_debug_report:
+            debug_path = out_dir / company_id / f"{company_id}_debug_fill_report.json"
+            debug_path.parent.mkdir(parents=True, exist_ok=True)
+            with debug_path.open("w", encoding="utf-8") as f:
+                json.dump(debug_reports, f, ensure_ascii=False, indent=2)
+            logger.info(f"[{company_id}] 调试报告已输出: {debug_path}")

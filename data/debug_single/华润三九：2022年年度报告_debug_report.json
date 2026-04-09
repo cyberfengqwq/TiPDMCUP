@@ -1,0 +1,21 @@
+{
+  "pdf": "示例数据/附件2：财务报告/reports-深交所/华润三九：2022年年度报告.pdf",
+  "stock_code": "reports-深交所",
+  "stock_abbr": null,
+  "report_period": "2022-12-31",
+  "report_year": 2022,
+  "report_quarter": "Q4",
+  "report_type": "annual",
+  "raw_tables_count": 389,
+  "metric_records_count": 12,
+  "table_rows_count": {
+    "core_performance_indicators_sheet": 1,
+    "balance_sheet": 1,
+    "income_sheet": 1,
+    "cash_flow_sheet": 0
+  },
+  "outputs": {
+    "detail_csv": "data/debug_single/华润三九：2022年年度报告_metric_records_detail.csv",
+    "summary_json": "data/debug_single/华润三九：2022年年度报告_field_hit_summary.json"
+  }
+}

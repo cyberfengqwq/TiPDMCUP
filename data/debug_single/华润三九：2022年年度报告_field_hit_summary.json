@@ -1,0 +1,17 @@
+{
+  "balance_sheet": {
+    "asset_total_assets": 1,
+    "asset_trading_financial_assets": 2,
+    "asset_cash_and_cash_equivalents": 1,
+    "asset_construction_in_progress": 1
+  },
+  "core_performance_indicators_sheet": {
+    "net_profit_10k_yuan": 1
+  },
+  "income_sheet": {
+    "net_profit": 1,
+    "asset_impairment_loss": 2,
+    "other_income": 1,
+    "credit_impairment_loss": 2
+  }
+}
