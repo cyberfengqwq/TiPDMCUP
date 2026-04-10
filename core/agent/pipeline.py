@@ -3,10 +3,10 @@
 
 import logging
 
-from core.agent.intent_manager import IntentGatekeeper
+# from core.agent.intent_manager import IntentGatekeeper
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.sql_retriever import DualRetrieval
-from core.services.llm_service import LLM
+from core.services.vllm_service import LLM
 from core.stores.chat_store import ChatStore
 
 logging.basicConfig(level=logging.INFO)
@@ -22,8 +22,9 @@ class Agent:
         self.rag = DualRetrieval(user_id=user_id, company_id=company_id)
         self.memory = UserProfileRetrieval(user_id=user_id)
         self.chat_store = ChatStore(chat_id=chat_id)
-        self.llm = LLM()
-        self.intent = IntentGatekeeper()
+        self.llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
+        self.llm.load_model()
+        # self.intent = IntentGatekeeper()
 
     def build_history_text(self, limit: int = 6) -> str:
         history: list[dict] = self.chat_store.get_history()
@@ -71,11 +72,11 @@ class Agent:
         return prompt.strip()
 
     def run(self, question: str) -> str:
-        history: str = self.build_history_text()
-        slots = self.intent.analyze(question, history)
+        # history: str = self.build_history_text()
+        # slots = self.intent.analyze(question, history)
 
-        if not slots.is_complete:
-            return f"-- 信息不足: {slots.missing_reason or '请补充公司、年份、报告期、指标'}"
+        # if not slots.is_complete:
+        # return f"-- 信息不足: {slots.missing_reason or '请补充公司、年份、报告期、指标'}"
 
         logger.info(f"用户输入自然语言：{question}")
 

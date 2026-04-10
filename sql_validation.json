@@ -1,0 +1,132 @@
+[
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的最高营业收入对比",
+    "output": "SELECT stock_abbr, MAX(total_operating_revenue) as max_revenue FROM income_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司平均销售毛利率对比",
+    "output": "SELECT stock_abbr, AVG(gross_profit_margin) as avg_margin FROM core_performance_indicators_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的总负债总和对比",
+    "output": "SELECT stock_abbr, SUM(liability_total_liabilities) as total_liabilities FROM balance_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比金花股份和华润三九的最新每股收益",
+    "output": "SELECT c1.stock_abbr, c1.eps FROM core_performance_indicators_sheet c1 WHERE c1.stock_abbr IN ('金花股份', '华润三九') ORDER BY c1.report_period DESC LIMIT 2;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的平均ROE对比",
+    "output": "SELECT stock_abbr, AVG(roe) as avg_roe FROM core_performance_indicators_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司最高资产负债率的对比",
+    "output": "SELECT stock_abbr, MAX(asset_liability_ratio) as max_ratio FROM balance_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司平均利润总额对比",
+    "output": "SELECT stock_abbr, AVG(total_profit) as avg_profit FROM income_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的总资产总和对比",
+    "output": "SELECT stock_abbr, SUM(asset_total_assets) as total_assets FROM balance_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司平均营业收入对比",
+    "output": "SELECT stock_abbr, AVG(total_operating_revenue) as avg_revenue FROM income_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司平均每股净资产对比",
+    "output": "SELECT stock_abbr, AVG(net_asset_per_share) as avg_per_share FROM core_performance_indicators_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的最高营业收入对比",
+    "output": "SELECT stock_abbr, MAX(total_operating_revenue) as max_revenue FROM income_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司平均销售毛利率对比",
+    "output": "SELECT stock_abbr, AVG(gross_profit_margin) as avg_margin FROM core_performance_indicators_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "两个公司的总负债总和对比",
+    "output": "SELECT stock_abbr, SUM(liability_total_liabilities) as total_liabilities FROM balance_sheet WHERE stock_abbr IN ('金花股份', '华润三九') GROUP BY stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份利润总额大于平均值的报告期",
+    "output": "SELECT report_period, total_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND total_profit > (SELECT AVG(total_profit) FROM income_sheet WHERE stock_abbr = '金花股份');"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份各报告期负债占资产比例的变化",
+    "output": "SELECT report_period, liability_total_liabilities, asset_total_assets, ROUND((liability_total_liabilities / asset_total_assets) * 100, 2) as liability_asset_ratio FROM balance_sheet WHERE stock_abbr = '金花股份' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份各类费用占营业收入的比例",
+    "output": "SELECT report_period, total_operating_revenue, operating_expense_selling_expenses, operating_expense_administrative_expenses, ROUND((operating_expense_selling_expenses + operating_expense_administrative_expenses) / total_operating_revenue * 100, 2) as fee_ratio FROM income_sheet WHERE stock_abbr = '金花股份' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份应收账款和存货占总资产的比例",
+    "output": "SELECT report_period, asset_accounts_receivable, asset_inventory, asset_total_assets, ROUND((asset_accounts_receivable + asset_inventory) / asset_total_assets * 100, 2) as working_capital_ratio FROM balance_sheet WHERE stock_abbr = '金花股份' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份经营现金流与净利润的关系",
+    "output": "SELECT i.report_period, i.net_profit, c.operating_cf_net_amount FROM income_sheet i JOIN cash_flow_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '金花股份' ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份利润质量分析",
+    "output": "SELECT i.report_period, i.net_profit, c.operating_cf_net_amount, ROUND(c.operating_cf_net_amount / i.net_profit, 2) as quality_ratio FROM income_sheet i JOIN cash_flow_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '金花股份' AND i.net_profit > 0 ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份扣非净利润的可持续性分析",
+    "output": "SELECT report_period, net_profit_excl_non_recurring, net_profit_excl_non_recurring_yoy FROM core_performance_indicators_sheet WHERE stock_abbr = '金花股份' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份股东权益与净资产收益率的关系",
+    "output": "SELECT b.report_period, b.equity_total_equity, c.roe FROM balance_sheet b JOIN core_performance_indicators_sheet c ON b.stock_abbr = c.stock_abbr AND b.report_period = c.report_period WHERE b.stock_abbr = '金花股份' ORDER BY b.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份研发投入与利润增长的关系",
+    "output": "SELECT i.report_period, i.operating_expense_rnd_expenses, i.total_profit, c.total_operating_revenue FROM income_sheet i JOIN core_performance_indicators_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '金花股份' ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份总资产与总负债的匹配情况",
+    "output": "SELECT b.report_period, b.asset_total_assets, b.liability_total_liabilities, b.equity_total_equity FROM balance_sheet b WHERE b.stock_abbr = '金花股份' ORDER BY b.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九利润总额大于平均值的报告期",
+    "output": "SELECT report_period, total_profit FROM income_sheet WHERE stock_abbr = '华润三九' AND total_profit > (SELECT AVG(total_profit) FROM income_sheet WHERE stock_abbr = '华润三九');"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九各报告期负债占资产比例的变化",
+    "output": "SELECT report_period, liability_total_liabilities, asset_total_assets, ROUND((liability_total_liabilities / asset_total_assets) * 100, 2) as liability_asset_ratio FROM balance_sheet WHERE stock_abbr = '华润三九' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九各类费用占营业收入的比例",
+    "output": "SELECT report_period, total_operating_revenue, operating_expense_selling_expenses, operating_expense_administrative_expenses, ROUND((operating_expense_selling_expenses + operating_expense_administrative_expenses) / total_operating_revenue * 100, 2) as fee_ratio FROM income_sheet WHERE stock_abbr = '华润三九' ORDER BY report_period;"
+  }
+]
