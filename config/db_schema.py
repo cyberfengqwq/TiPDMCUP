@@ -95,10 +95,10 @@ DATABASE_SCHEMA_DICT: dict[str, dict[str, str]] = {
 SQL_EXAMPLES = [
     {
         "question": "金花股份近几年的利润总额变化趋势是什么样的",
-        "query": "SELECT report_period, total_profit FROM income_sheet WHERE stock_abbr = '金花股份' ORDER BY report_period;",
+        "query": "SELECT report_period, total_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND report_period >= '2022FY' AND report_period <= '2025Q3' ORDER BY report_period;",
     },
     {
-        "question": "2024年利润最高的top10企业是哪些",
-        "query": "SELECT stock_abbr, total_profit FROM income_sheet WHERE report_period LIKE '2024%' ORDER BY total_profit DESC LIMIT 10;",
+        "question": "金花股份2025年第三季度的利润总额是多少",
+        "query": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND report_period = '2025Q3';",
     },
 ]

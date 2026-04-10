@@ -55,15 +55,15 @@ def _infer_report_meta_from_filename(
     elif re.search(r"(年度|年报|Q4)", name, re.IGNORECASE):
         report_quarter = "Q4"
 
-    # 报告期默认日期（可后续由文本解析替换为精确日期）
+    # 报告期按季度标识（YYYYQx）
     if report_year and report_quarter == "Q1":
-        report_period = f"{report_year}-03-31"
+        report_period = f"{report_year}Q1"
     elif report_year and report_quarter == "Q2":
-        report_period = f"{report_year}-06-30"
+        report_period = f"{report_year}Q2"
     elif report_year and report_quarter == "Q3":
-        report_period = f"{report_year}-09-30"
+        report_period = f"{report_year}Q3"
     elif report_year and report_quarter == "Q4":
-        report_period = f"{report_year}-12-31"
+        report_period = f"{report_year}Q4"
 
     return report_period, report_year, report_quarter
 

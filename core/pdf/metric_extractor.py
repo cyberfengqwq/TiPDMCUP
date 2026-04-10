@@ -84,6 +84,23 @@ def _is_header_like_row(row: pd.Series) -> bool:
     return any(k in txt for k in header_keywords)
 
 
+def _find_label_cell(row: pd.Series) -> tuple[str, int]:
+    """
+    找到该行的“科目/项目”文本所在列。
+    默认只在前3列里找非空且非纯数字的文本。
+    """
+    values = row.tolist()
+    max_scan = min(3, len(values))
+    for i in range(max_scan):
+        raw = values[i]
+        text = _normalize_text(raw)
+        if not text:
+            continue
+        if _to_number(text) is None:
+            return raw, i
+    return values[0] if values else "", 0
+
+
 def _build_column_roles(df: pd.DataFrame) -> dict[int, str]:
     """
     扫描前几行，推断每一列角色
@@ -121,7 +138,99 @@ def _build_column_roles(df: pd.DataFrame) -> dict[int, str]:
     return roles
 
 
-def _pick_value_with_role(row: pd.Series, col_roles: dict[int, str]):
+def _parse_period_token(
+    text: str, default_year: int | None
+) -> tuple[str | None, int | None, str | None]:
+    """
+    解析列头中的期间信息，返回 (report_period, report_year, report_quarter)
+    规则：
+      - 2022年 -> 2022Q4
+      - Q1/Q2/Q3/Q4 或 第一季度/第二季度/第三季度/第四季度 -> 以 default_year 组成 YYYYQx
+      - 含同比/环比/增减/% 的列忽略
+    """
+    t = _normalize_text(text)
+    if not t:
+        return None, None, None
+
+    if re.search(r"(同比|环比|增减|增长|变动|%|百分)", t):
+        return None, None, None
+
+    m = re.search(r"(20\d{2})年", t)
+    if m:
+        year = int(m.group(1))
+        return f"{year}Q4", year, "Q4"
+
+    if re.search(r"(第一季度|一季度|Q1|1-3月|1-3月份|1至3月)", t, re.IGNORECASE):
+        if default_year is None:
+            return None, None, None
+        return f"{default_year}Q1", default_year, "Q1"
+    if re.search(
+        r"(第二季度|二季度|Q2|4-6月|4-6月份|4至6月|半年度|中报)", t, re.IGNORECASE
+    ):
+        if default_year is None:
+            return None, None, None
+        return f"{default_year}Q2", default_year, "Q2"
+    if re.search(r"(第三季度|三季度|Q3|7-9月|7-9月份|7至9月)", t, re.IGNORECASE):
+        if default_year is None:
+            return None, None, None
+        return f"{default_year}Q3", default_year, "Q3"
+    if re.search(
+        r"(第四季度|四季度|Q4|10-12月|10-12月份|10至12月|年度|年报)", t, re.IGNORECASE
+    ):
+        if default_year is None:
+            return None, None, None
+        return f"{default_year}Q4", default_year, "Q4"
+
+    return None, None, None
+
+
+def _build_column_tokens(df: pd.DataFrame, scan_rows: int = 5) -> dict[int, str]:
+    """
+    把表头的多行信息按列拼接为一个 token，提升季度/年份识别率
+    """
+    tokens: dict[int, str] = {}
+    if df.empty:
+        return tokens
+
+    rows = min(scan_rows, len(df))
+    for i in range(len(df.columns)):
+        parts: list[str] = []
+        for r in range(rows):
+            v = df.iloc[r, i]
+            t = _normalize_text(v)
+            if t:
+                parts.append(t)
+        if parts:
+            tokens[i] = "".join(parts)
+    return tokens
+
+
+def _infer_column_periods(
+    df: pd.DataFrame, default_year: int | None
+) -> dict[int, tuple[str, int, str]]:
+    """
+    从表头行推断每一列对应的 report_period/report_year/report_quarter
+    返回: {col_idx: (period, year, quarter)}
+    """
+    periods: dict[int, tuple[str, int, str]] = {}
+    if df.empty:
+        return periods
+
+    col_tokens = _build_column_tokens(df, scan_rows=5)
+    for i, token in col_tokens.items():
+        p, y, q = _parse_period_token(token, default_year)
+        if p and y and q:
+            periods[i] = (p, y, q)
+
+    # 若存在季度列，只保留季度列（避免混入同比/环比等列）
+    has_quarter = any(q in ("Q1", "Q2", "Q3", "Q4") for _, (_, _, q) in periods.items())
+    if has_quarter:
+        periods = {i: v for i, v in periods.items() if v[2] in ("Q1", "Q2", "Q3", "Q4")}
+
+    return periods
+
+
+def _pick_value_with_role(row: pd.Series, col_roles: dict[int, str], label_col: int):
     """
     从一行中选数值：
     1) 优先 current
@@ -130,7 +239,8 @@ def _pick_value_with_role(row: pd.Series, col_roles: dict[int, str]):
     返回固定三元组: (value, role, col_idx)
     """
     values = row.tolist()
-    candidate_indices = list(range(1, len(values)))  # 跳过第0列科目名
+    start = min(label_col + 1, len(values))
+    candidate_indices = list(range(start, len(values)))
 
     # 先 current
     for i in candidate_indices:
@@ -202,6 +312,8 @@ def extract_metric_records(
 
         # 识别列角色（本期/上期）
         col_roles = _build_column_roles(df)
+        # 识别列对应的季度/年份
+        col_periods = _infer_column_periods(df, report_year)
 
         # 若前几行像表头，行遍历时自动跳过
         for _, row in df.iterrows():
@@ -209,19 +321,15 @@ def extract_metric_records(
             if _is_header_like_row(row):
                 continue
 
-            item_text_raw = row.iloc[0]
+            item_text_raw, label_col = _find_label_cell(row)
             item_text = _normalize_text(item_text_raw)
 
             # 若没有科目名，丢掉该行
             if not item_text:
                 continue
 
-            value, picked_role, picked_col = _pick_value_with_role(row, col_roles)
-            if value is None:
-                continue
-
             # 用于去重：同一table + field + source_text，只保留最高置信度
-            best_local: dict[tuple[str, str, str], MetricRecord] = {}
+            best_local: dict[tuple[str, str, str, str], MetricRecord] = {}
 
             for table_name, mapping in FIELD_PATTERNS.items():
                 for field_key, patterns in mapping.items():
@@ -246,34 +354,69 @@ def extract_metric_records(
                     if not matched:
                         continue
 
-                    # 列角色微调置信度：current +0.03，previous -0.02
-                    if picked_role == "current":
-                        best_conf += 0.03
-                    elif picked_role == "previous":
-                        best_conf -= 0.02
+                    # 若识别到了列期间，就逐列写入
+                    if col_periods:
+                        for col_idx, (p, y, q) in col_periods.items():
+                            if col_idx <= label_col:
+                                continue
+                            num = _to_number(row.iloc[col_idx])
+                            if num is None:
+                                continue
 
-                    # clamp
-                    best_conf = max(0.0, min(0.99, best_conf))
+                            mr = MetricRecord(
+                                table_name=table_name,
+                                field_key=field_key,
+                                value=num,
+                                report_period=p,
+                                report_year=y,
+                                report_type=report_type,
+                                report_quarter=q,
+                                stock_code=stock_code,
+                                stock_abbr=stock_abbr,
+                                confidence=best_conf,
+                                source_page=rt.page_no,
+                                source_text=f"{item_text_raw} | col={col_idx} period={p}",
+                            )
 
-                    mr = MetricRecord(
-                        table_name=table_name,
-                        field_key=field_key,
-                        value=value,
-                        report_period=report_period,
-                        report_year=report_year,
-                        report_type=report_type,
-                        report_quarter=report_quarter,
-                        stock_code=stock_code,
-                        stock_abbr=stock_abbr,
-                        confidence=best_conf,
-                        source_page=rt.page_no,
-                        source_text=f"{item_text_raw} | col={picked_col} role={picked_role}",
-                    )
+                            key = (table_name, field_key, item_text, p)
+                            old = best_local.get(key)
+                            if old is None or mr.confidence > old.confidence:
+                                best_local[key] = mr
+                    else:
+                        value, picked_role, picked_col = _pick_value_with_role(
+                            row, col_roles, label_col
+                        )
+                        if value is None:
+                            continue
 
-                    key = (table_name, field_key, item_text)
-                    old = best_local.get(key)
-                    if old is None or mr.confidence > old.confidence:
-                        best_local[key] = mr
+                        # 列角色微调置信度：current +0.03，previous -0.02
+                        if picked_role == "current":
+                            best_conf += 0.03
+                        elif picked_role == "previous":
+                            best_conf -= 0.02
+
+                        # clamp
+                        best_conf = max(0.0, min(0.99, best_conf))
+
+                        mr = MetricRecord(
+                            table_name=table_name,
+                            field_key=field_key,
+                            value=value,
+                            report_period=report_period,
+                            report_year=report_year,
+                            report_type=report_type,
+                            report_quarter=report_quarter,
+                            stock_code=stock_code,
+                            stock_abbr=stock_abbr,
+                            confidence=best_conf,
+                            source_page=rt.page_no,
+                            source_text=f"{item_text_raw} | col={picked_col} role={picked_role}",
+                        )
+
+                        key = (table_name, field_key, item_text, report_period or "")
+                        old = best_local.get(key)
+                        if old is None or mr.confidence > old.confidence:
+                            best_local[key] = mr
 
             records.extend(best_local.values())
 

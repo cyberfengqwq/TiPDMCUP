@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+
+# core/pdf/aggregator.py
 from collections import defaultdict
 
 import pandas as pd
@@ -11,9 +13,26 @@ from config.db_schema import DATABASE_SCHEMA_DICT
 from core.pdf.models import MetricRecord
 
 
+def merge_duplicate_rows(rows: list[dict], key_fields: list[str]) -> list[dict]:
+    """
+    合并重复行：同 key 合并为一行，优先保留非空值
+    """
+    merged: dict[tuple, dict] = {}
+    for r in rows:
+        key = tuple(r.get(k) for k in key_fields)
+        if key not in merged:
+            merged[key] = r.copy()
+            continue
+
+        for k, v in r.items():
+            if merged[key].get(k) is None or pd.isna(merged[key].get(k)):
+                merged[key][k] = v
+    return list(merged.values())
+
+
 def _extract_role_from_source_text(source_text: str | None) -> str:
     """
-    ��� source_text 中抽取 role:
+    source_text 中抽取 role:
     例如 metric_extractor 里写入了: "... | col=3 role=current"
     """
     if not source_text:
@@ -160,9 +179,18 @@ def metric_records_to_rows(
 
         out[table_name].append(row)
 
-    # Loop_3: 补充序号，保证存进 MySQL 时有唯一主键
+    # Loop_3: 合并重复行并补充序号，保证存进 MySQL 时有唯一主键
     for t_name, rows in out.items():
-        rows_sorted = _safe_sort_rows_by_period(rows, t_name)
+        rows_merged = merge_duplicate_rows(
+            rows,
+            key_fields=[
+                "stock_code",
+                "report_year",
+                "report_period",
+                "_report_quarter",
+            ],
+        )
+        rows_sorted = _safe_sort_rows_by_period(rows_merged, t_name)
         out[t_name] = rows_sorted
 
         if "serial_number" in DATABASE_SCHEMA_DICT[t_name]:
