@@ -1,0 +1,17 @@
+﻿table_name,field_key,value,confidence,stock_code,stock_abbr,report_period,report_year,report_quarter,source_page,source_text
+balance_sheet,asset_total_assets,10.52,0.85,reports-深交所,,2022-12-31,2022,Q4,8,总资产（元） | col=10 role=unknown
+core_performance_indicators_sheet,net_profit_10k_yuan,797413610.83,0.95,reports-深交所,,2022-12-31,2022,Q4,8,"归属于上市公司股东的扣除非经常
+性损益的净利润 | col=3 role=unknown"
+income_sheet,net_profit,797413610.83,0.95,reports-深交所,,2022-12-31,2022,Q4,8,"归属于上市公司股东的扣除非经常
+性损益的净利润 | col=3 role=unknown"
+income_sheet,asset_impairment_loss,-5974542.34,0.85,reports-深交所,,2022-12-31,2022,Q4,23,"信用资产减
+值损失 | col=1 role=unknown"
+income_sheet,asset_impairment_loss,-138270357.39,0.95,reports-深交所,,2022-12-31,2022,Q4,23,"资产减值损
+失 | col=1 role=unknown"
+income_sheet,other_income,35541395.86,0.95,reports-深交所,,2022-12-31,2022,Q4,23,营业外收入 | col=1 role=unknown
+balance_sheet,asset_trading_financial_assets,2579979.71,0.88,reports-深交所,,2022-12-31,2022,Q4,24,其他非流动金融资产 | col=6 role=current
+balance_sheet,asset_trading_financial_assets,2579979.71,0.85,reports-深交所,,2022-12-31,2022,Q4,24,金融资产小计 | col=7 role=unknown
+balance_sheet,asset_cash_and_cash_equivalents,14505926.59,0.95,reports-深交所,,2022-12-31,2022,Q4,24,货币资金 | col=1 role=unknown
+balance_sheet,asset_construction_in_progress,42413983.61,0.95,reports-深交所,,2022-12-31,2022,Q4,24,在建工程 | col=1 role=unknown
+income_sheet,credit_impairment_loss,4183872376.6,0.85,reports-深交所,,2022-12-31,2022,Q4,128,按信用风险特征组合计提坏账准备 | col=1 role=unknown
+income_sheet,credit_impairment_loss,3217740120.77,0.85,reports-深交所,,2022-12-31,2022,Q4,128,按信用风险特征组合计提坏账准备 | col=1 role=unknown
