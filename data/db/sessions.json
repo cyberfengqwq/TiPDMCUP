@@ -58,5 +58,25 @@
         ],
         "issued_at": "2026-04-06T09:23:59.579654+00:00",
         "expires_at": "2026-04-06T11:23:59.579654+00:00"
+    },
+    {
+        "session_id": "c4da673f-0704-4de3-8a17-fe79dee206a8",
+        "user_id": "awa",
+        "active_company_id": "test",
+        "roles": [
+            "member"
+        ],
+        "issued_at": "2026-04-09T08:43:29.105237+00:00",
+        "expires_at": "2026-04-09T10:43:29.105237+00:00"
+    },
+    {
+        "session_id": "df24f9ae-7aa3-4464-9f47-536bb3ac6736",
+        "user_id": "123",
+        "active_company_id": "com",
+        "roles": [
+            "member"
+        ],
+        "issued_at": "2026-04-09T08:44:37.002257+00:00",
+        "expires_at": "2026-04-09T10:44:37.002257+00:00"
     }
 ]

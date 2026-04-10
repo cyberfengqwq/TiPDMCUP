@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "v"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT stock_abbr, total_profit FROM income_sheet WHERE report_period LIKE '2024%' ORDER BY total_profit DESC LIMIT 10;"
+    }
+]

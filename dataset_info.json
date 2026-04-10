@@ -1,0 +1,26 @@
+{
+    "sql_training": {
+        "file_name": "sql_training.json",
+        "columns": {
+            "prompt": "instruction",
+            "query": "input",
+            "response": "output"
+        }
+    },
+    "sql_validation": {
+        "file_name": "sql_validation.json",
+        "columns": {
+            "prompt": "instruction",
+            "query": "input",
+            "response": "output"
+        }
+    },
+    "sql_test": {
+        "file_name": "sql_test.json",
+        "columns": {
+            "prompt": "instruction",
+            "query": "input",
+            "response": "output"
+        }
+    }
+}

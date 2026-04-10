@@ -3,7 +3,7 @@
 import logging
 
 from core.rag.memory_retrieval import UserProfileRetrieval
-from core.services.llm_service import LLM
+from core.services.vllm_service import LLM
 from core.stores.chat_store import ChatStore
 from core.stores.profile_store import ProfileStore
 
@@ -16,7 +16,8 @@ class ProfileService:
         self.user_id = user_id
         self.chat_id = chat_id
 
-        self.llm = LLM()
+        self.llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
+        self.llm.load_model()
         self.profile_store = ProfileStore(user_id)
         self.chat_store = ChatStore(chat_id)
 
@@ -26,7 +27,6 @@ class ProfileService:
             str: 用户个人画像描述
         """
         return self.profile_store.get_summary()
-    
 
     def sum_and_update_profile(self) -> str | None:
         chat_history: list[dict] = self.chat_store.get_history()

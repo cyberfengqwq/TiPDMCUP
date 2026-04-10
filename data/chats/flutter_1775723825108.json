@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "金花股份2024年的营收是多少"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND report_period LIKE '2024%';"
+    }
+]

@@ -16,5 +16,17 @@
         "username": "yyf",
         "password_hash": "$2b$12$I.9NEFKno.mJZa9qm6eBB.aaepaqk8fHZ9KMujGrWh9qVDMXP4foC",
         "status": "active"
+    },
+    {
+        "id": "awa",
+        "username": "awa",
+        "password_hash": "$2b$12$Y5B6v0FapqupwYtWVH9sLO.g8m7BKmuirieZM6rd43o33iPPJBhaG",
+        "status": "active"
+    },
+    {
+        "id": "123",
+        "username": "123",
+        "password_hash": "$2b$12$lm1Vnvu0naaHX4UQGdMQXuBR5xVsQd/VvW7BU6UjnjiBCI9o4GOvK",
+        "status": "active"
     }
 ]

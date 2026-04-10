@@ -1,0 +1,137 @@
+[
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九应收账款和存货占总资产的比例",
+    "output": "SELECT report_period, asset_accounts_receivable, asset_inventory, asset_total_assets, ROUND((asset_accounts_receivable + asset_inventory) / asset_total_assets * 100, 2) as working_capital_ratio FROM balance_sheet WHERE stock_abbr = '华润三九' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九经营现金流与净利润的关系",
+    "output": "SELECT i.report_period, i.net_profit, c.operating_cf_net_amount FROM income_sheet i JOIN cash_flow_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '华润三九' ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九利润质量分析",
+    "output": "SELECT i.report_period, i.net_profit, c.operating_cf_net_amount, ROUND(c.operating_cf_net_amount / i.net_profit, 2) as quality_ratio FROM income_sheet i JOIN cash_flow_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '华润三九' AND i.net_profit > 0 ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九扣非净利润的可持续性分析",
+    "output": "SELECT report_period, net_profit_excl_non_recurring, net_profit_excl_non_recurring_yoy FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九' ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九股东权益与净资产收益率的关系",
+    "output": "SELECT b.report_period, b.equity_total_equity, c.roe FROM balance_sheet b JOIN core_performance_indicators_sheet c ON b.stock_abbr = c.stock_abbr AND b.report_period = c.report_period WHERE b.stock_abbr = '华润三九' ORDER BY b.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九研发投入与利润增长的关系",
+    "output": "SELECT i.report_period, i.operating_expense_rnd_expenses, i.total_profit, c.total_operating_revenue FROM income_sheet i JOIN core_performance_indicators_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '华润三九' ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九总资产与总负债的匹配情况",
+    "output": "SELECT b.report_period, b.asset_total_assets, b.liability_total_liabilities, b.equity_total_equity FROM balance_sheet b WHERE b.stock_abbr = '华润三九' ORDER BY b.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "查询金花股份NULL值的每股收益",
+    "output": "SELECT report_period, eps FROM core_performance_indicators_sheet WHERE stock_abbr = '金花股份' AND eps IS NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份非NULL的净利润",
+    "output": "SELECT report_period, net_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND net_profit IS NOT NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份最近的报告期是什么时候",
+    "output": "SELECT MAX(report_period) as latest_period FROM core_performance_indicators_sheet WHERE stock_abbr = '金花股份';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份最早的报告期是什么时候",
+    "output": "SELECT MIN(report_period) as earliest_period FROM income_sheet WHERE stock_abbr = '金花股份';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份报告期为2024FY的数据",
+    "output": "SELECT * FROM core_performance_indicators_sheet WHERE stock_abbr = '金花股份' AND report_period = '2024FY' LIMIT 1;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份为空的资产负债率",
+    "output": "SELECT report_period FROM balance_sheet WHERE stock_abbr = '金花股份' AND asset_liability_ratio IS NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份净利润为0的报告期",
+    "output": "SELECT report_period, net_profit FROM income_sheet WHERE stock_abbr = '金花股份' AND net_profit = 0;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份现金流为负的报告期",
+    "output": "SELECT report_period, net_cash_flow FROM cash_flow_sheet WHERE stock_abbr = '金花股份' AND net_cash_flow < 0;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份超出异常范围的ROE值（大于100%）",
+    "output": "SELECT report_period, roe FROM core_performance_indicators_sheet WHERE stock_abbr = '金花股份' AND roe > 100;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "金花股份资产负债率超过100%的报告期",
+    "output": "SELECT report_period, asset_liability_ratio FROM balance_sheet WHERE stock_abbr = '金花股份' AND asset_liability_ratio > 100;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "查询华润三九NULL值的每股收益",
+    "output": "SELECT report_period, eps FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九' AND eps IS NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九非NULL的净利润",
+    "output": "SELECT report_period, net_profit FROM income_sheet WHERE stock_abbr = '华润三九' AND net_profit IS NOT NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九最近的报告期是什么时候",
+    "output": "SELECT MAX(report_period) as latest_period FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九最早的报告期是什么时候",
+    "output": "SELECT MIN(report_period) as earliest_period FROM income_sheet WHERE stock_abbr = '华润三九';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九报告期为2024FY的数据",
+    "output": "SELECT * FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九' AND report_period = '2024FY' LIMIT 1;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九为空的资产负债率",
+    "output": "SELECT report_period FROM balance_sheet WHERE stock_abbr = '华润三九' AND asset_liability_ratio IS NULL;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九净利润为0的报告期",
+    "output": "SELECT report_period, net_profit FROM income_sheet WHERE stock_abbr = '华润三九' AND net_profit = 0;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九现金流为负的报告期",
+    "output": "SELECT report_period, net_cash_flow FROM cash_flow_sheet WHERE stock_abbr = '华润三九' AND net_cash_flow < 0;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九超出异常范围的ROE值（大于100%）",
+    "output": "SELECT report_period, roe FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九' AND roe > 100;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九资产负债率超过100%的报告期",
+    "output": "SELECT report_period, asset_liability_ratio FROM balance_sheet WHERE stock_abbr = '华润三九' AND asset_liability_ratio > 100;"
+  }
+]
