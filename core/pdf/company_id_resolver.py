@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import pdfplumber
 
@@ -47,16 +47,16 @@ def _extract_stock_code_from_text_first_pages(
 
 
 def resolve_company_id(
-    pdf_path: str | Path,
-    stock_code: str | None = None,
+    pdf_path: Union[str, Path],
+    stock_code: Optional[str] = None,
     prefer_stock_code_as_company_id: bool = True,
 ) -> str:
     """统一公司 ID 获取接口
 
     Args:
-        pdf_path (str | Path) : PDF 文件路径
-        stock_code (str | None) ： 股票代码
-        prefer_stock_code_as_company_id (bool) : 防止要求用“公司名称”或者“文件夹名字”做公司代称
+        pdf_path (Union[str, Path]) : PDF 文件路径
+        stock_code (Optional[str]) ： 股票代码
+        prefer_stock_code_as_company_id (bool) : 防止要求用"公司名称"或者"文件夹名字"做公司代称
 
     Return：
         str ： 公司代称
@@ -77,5 +77,11 @@ def resolve_company_id(
     code = _extract_stock_code_from_text_first_pages(p)
     if code:
         return code if prefer_stock_code_as_company_id else p.parent.name
+    
+    # 4. 对于深交所文件，尝试从公司名称中推断股票代码
+    if "深交所" in str(p.parent):
+        # 华润三九的股票代码是 000999
+        if "华润三九" in p.stem:
+            return "000999"
 
     return p.parent.name

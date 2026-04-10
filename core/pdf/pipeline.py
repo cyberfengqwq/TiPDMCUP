@@ -5,6 +5,7 @@ import logging
 import re
 import shutil
 from pathlib import Path
+from typing import Union, Optional, Tuple, List, Dict
 
 import pandas as pd
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def _infer_report_meta_from_filename(
     pdf_path: Path,
-) -> tuple[str | None, int | None, str | None]:
+) -> Tuple[Optional[str], Optional[int], Optional[str]]:
     """
     从文件名推断 report_period / report_year / report_quarter
     适配示例：
@@ -75,7 +76,7 @@ def _nonnull_ratio(series: pd.Series) -> float:
     return float(nonnull.sum()) / float(len(series))
 
 
-def _table_fill_report(df: pd.DataFrame, table_name: str) -> dict:
+def _table_fill_report(df: pd.DataFrame, table_name: str) -> Dict:
     """
     生成字段填充率报告：每列非空比例
     """
@@ -158,9 +159,9 @@ class PDFPipeline:
 
     def process_one_pdf(
         self,
-        pdf_path: str | Path,
-        stock_abbr: str | None = None,
-    ) -> dict[str, list[dict]]:
+        pdf_path: Union[str, Path],
+        stock_abbr: Optional[str] = None,
+    ) -> Dict[str, List[Dict]]:
         pdf_path = Path(pdf_path)
         logger.info(f"开始处理 {pdf_path}")
 
@@ -199,8 +200,8 @@ class PDFPipeline:
 
     def process_company_folder(
         self,
-        folder: str | Path,
-        out_dir: str | Path,
+        folder: Union[str, Path],
+        out_dir: Union[str, Path],
         dump_debug_report: bool = True,
     ) -> None:
         folder = Path(folder)
@@ -214,25 +215,53 @@ class PDFPipeline:
         pdf_files = sorted(folder.glob("*.pdf"))
         logger.info(f"[{company_id}] 待处理 PDF 数量: {len(pdf_files)}")
 
-        aggregated = {
-            "core_performance_indicators_sheet": [],
-            "balance_sheet": [],
-            "income_sheet": [],
-            "cash_flow_sheet": [],
+        # 按表名、股票代码、报告期分组
+        aggregated_groups: Dict[str, Dict[Tuple[str, str], Dict]] = {
+            "core_performance_indicators_sheet": {},
+            "balance_sheet": {},
+            "income_sheet": {},
+            "cash_flow_sheet": {},
         }
 
         for pdf in pdf_files:
             rows_by_table = self.process_one_pdf(pdf)
             for tname, rows in rows_by_table.items():
-                aggregated[tname].extend(rows)
+                for row in rows:
+                    stock_code = row.get("stock_code")
+                    report_period = row.get("report_period")
+                    if not stock_code or not report_period:
+                        continue
+                    key = (stock_code, report_period)
+                    
+                    # 如果该键不存在，直接添加
+                    if key not in aggregated_groups[tname]:
+                        aggregated_groups[tname][key] = row
+                    else:
+                        # 否则，合并行，优先保留非空值
+                        existing_row = aggregated_groups[tname][key]
+                        for k, v in row.items():
+                            if existing_row.get(k) is None or pd.isna(existing_row.get(k)):
+                                existing_row[k] = v
 
-        debug_reports: list[dict] = []
+        # 转换为列表格式
+        aggregated = {}
+        for tname, groups in aggregated_groups.items():
+            aggregated[tname] = list(groups.values())
+
+        debug_reports: List[Dict] = []
 
         for tname, rows in aggregated.items():
-            # 去掉中间调试字段，确保严格 schema
-            for r in rows:
-                r.pop("_report_quarter", None)
-
+            # 按报告期排序
+            if tname in DATABASE_SCHEMA_DICT:
+                cols = DATABASE_SCHEMA_DICT[tname]
+                if "report_period" in cols:
+                    rows.sort(key=lambda x: x.get("report_period", "9999-99-99"))
+            
+            # 补充序号
+            if "serial_number" in DATABASE_SCHEMA_DICT.get(tname, {}):
+                for i, r in enumerate(rows, start=1):
+                    r["serial_number"] = i
+            
             df = SchemaExporter.build_df(tname, rows)
             SchemaExporter.save_csv(
                 df,

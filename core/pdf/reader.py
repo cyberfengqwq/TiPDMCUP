@@ -1,5 +1,6 @@
 # core/pdf/reader.py
 from pathlib import Path
+from typing import Union, List
 
 import pandas as pd
 import pdfplumber
@@ -8,11 +9,11 @@ from core.pdf.models import RawTable
 
 
 class PDFReader:
-    def read_tables(self, pdf_path: str | Path) -> list[RawTable]:
+    def read_tables(self, pdf_path: Union[str, Path]) -> List[RawTable]:
         # 统一为 Path 路径格式
         pdf_path = Path(pdf_path)
         # 准备一个空列表，最终返回装满 raw_table 的列表
-        results: list[RawTable] = []
+        results: List[RawTable] = []
 
         with pdfplumber.open(pdf_path) as pdf:
             # Loop_1: 一页一页的遍历 PDF 提取表格为 df 格式，同时获取溯源页码

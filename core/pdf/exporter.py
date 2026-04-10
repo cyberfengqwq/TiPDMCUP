@@ -1,6 +1,7 @@
 # core/pdf/exporter.py
 
 from pathlib import Path
+from typing import Union, List, Dict
 
 import pandas as pd
 
@@ -14,12 +15,12 @@ class SchemaExporter:
 
     # 静态方法，可在外部直接调用
     @staticmethod
-    def build_df(table_name: str, rows: list[dict]) -> pd.DataFrame:
+    def build_df(table_name: str, rows: List[Dict]) -> pd.DataFrame:
         # 从官方附件中获取英文字段作为列名
-        cols: list[str] = list(DATABASE_SCHEMA_DICT[table_name].keys())
+        cols: List[str] = list(DATABASE_SCHEMA_DICT[table_name].keys())
 
         # 空的字典列表，
-        normalized: list[dict] = []
+        normalized: List[Dict] = []
         # Loop_1: 遍历 out 字典的 value, 根据官方附件创建空白 ”答题卡“
         for r in rows:
             item = {c: pd.NA for c in cols}
@@ -34,16 +35,16 @@ class SchemaExporter:
     @staticmethod
     def validate_strict(df: pd.DataFrame, table_name: str) -> None:
         # 官方列名
-        expected: list = list(DATABASE_SCHEMA_DICT[table_name].keys())
+        expected: List = list(DATABASE_SCHEMA_DICT[table_name].keys())
         # 实际列名
-        actual: list = list(df.columns)
+        actual: List = list(df.columns)
         if actual != expected:
             raise ValueError(
                 f"[{table_name}] schema mismatch\nexpected={expected}\nactual={actual}"
             )
 
     @staticmethod
-    def save_csv(df: pd.DataFrame, table_name: str, out_file: str | Path) -> None:
+    def save_csv(df: pd.DataFrame, table_name: str, out_file: Union[str, Path]) -> None:
         SchemaExporter.validate_strict(df, table_name)
         out_file = Path(out_file)
 

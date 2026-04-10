@@ -136,25 +136,34 @@ MANUAL_ALIASES: dict[tuple[str, str], list[str]] = {
     ("balance_sheet", "asset_total_assets_yoy_growth"): [
         r"总资产.*同比",
         r"资产总计.*同比",
+        r"本年比上年.*增减.*%",
+        r"同比增长.*总资产",
     ],
     ("balance_sheet", "liability_accounts_payable"): [
         r"负债.*应付账款",
         r"应付账款(?!融资)",
         r"应付款项",
+        r"应付账款",
+        r"应付.*账款",
     ],
     ("balance_sheet", "liability_advance_from_customers"): [
         r"负债.*预收账款",
         r"预收账款",
         r"预收款",
+        r"预收.*账款",
     ],
     ("balance_sheet", "liability_total_liabilities"): [
         r"总负债(?!同比)",
         r"负债总计",
         r"负债合计",
+        r"负债总额",
+        r"负债.*合计",
     ],
     ("balance_sheet", "liability_total_liabilities_yoy_growth"): [
         r"总负债.*同比",
         r"负债总计.*同比",
+        r"负债.*同比",
+        r"本年比上年.*增减.*%",
     ],
     ("balance_sheet", "liability_contract_liabilities"): [
         r"合同负债",
@@ -181,6 +190,8 @@ MANUAL_ALIASES: dict[tuple[str, str], list[str]] = {
         r"股东权益合计",
         r"权益合计",
         r"权益总计",
+        r"股东权益",
+        r"所有者权益",
     ],
     # ==================== 利润表 (income_sheet) ====================
     ("income_sheet", "net_profit"): [
