@@ -12,12 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class ProfileService:
-    def __init__(self, user_id: str, chat_id: str) -> None:
+    def __init__(self, user_id: str, chat_id: str, llm: LLM) -> None:
         self.user_id = user_id
         self.chat_id = chat_id
 
-        self.llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
-        self.llm.load_model()
+        self.llm = llm
         self.profile_store = ProfileStore(user_id)
         self.chat_store = ChatStore(chat_id)
 

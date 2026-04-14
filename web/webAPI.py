@@ -14,6 +14,7 @@ from core.domain.models import SessionPrincipal
 from core.services.auth_service import AuthService
 from core.services.company_registry import CompanyRegistry
 from core.services.profile_service import ProfileService
+from core.services.vllm_service import LLM
 from core.stores.company_store import CompanyStore
 from core.stores.membership_store import MembershipStore
 from core.stores.session_store import SessionStore
@@ -39,6 +40,8 @@ session_store = SessionStore(SESSION_JSON)
 
 company_registry = CompanyRegistry(company_store)
 company_registry.reload()
+
+llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
 
 auth_service = AuthService(
     user_store=user_store,
@@ -250,7 +253,11 @@ def chat(
 
     if payload.is_end:
         agent_manager.destroy(payload.chat_id)
-        profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
+        profile_service = ProfileService(
+            user_id=user_id,
+            chat_id=payload.chat_id,
+            llm=llm,
+        )
         background_tasks.add_task(profile_service.sum_and_update_profile)
 
     return ChatResponse(answer=answer)
@@ -267,7 +274,11 @@ def logout(
 
     if payload.chat_id:
         agent_manager.destroy(payload.chat_id)
-        profile_service = ProfileService(user_id=user_id, chat_id=payload.chat_id)
+        profile_service = ProfileService(
+            user_id=user_id,
+            chat_id=payload.chat_id,
+            llm=llm,
+        )
         background_tasks.add_task(profile_service.sum_and_update_profile)
     else:
         agent_manager.destroy_user_agents(user_id)
