@@ -3,19 +3,23 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
-# from core.agent.intent_manager import IntentGatekeeper
+from core.agent.analyst import Analyst
+from core.agent.visualizer import draw_chart
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.report_retriever import ReportRetrieval
 from core.rag.sql_retriever import DualRetrieval
+from core.services.db_service import DBService  # MySQL执行层，见下方说明
 from core.services.vllm_service import LLM
 from core.stores.chat_store import ChatStore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-_REPORT_PERSIST = Path(__file__).resolve().parent.parent.parent / "data" / "faiss_report_store"
-
+_REPORT_PERSIST = (
+    Path(__file__).resolve().parent.parent.parent / "data" / "faiss_report_store"
+)
 _REPORT_DATA_ROOT = Path.home() / "正式数据" / "附件5：研报数据"
 _STOCK_DIR = _REPORT_DATA_ROOT / "个股研报"
 _INDUSTRY_DIR = _REPORT_DATA_ROOT / "行业研报"
@@ -26,11 +30,6 @@ _report_retrieval: ReportRetrieval | None = None
 
 
 def _get_report_retrieval() -> ReportRetrieval:
-    """
-    单例。服务首次使用时自动扫描研报目录：
-    - 有新增/修改/删除 PDF → 重建索引
-    - 无变化 → 直接复用已有索引
-    """
     global _report_retrieval
     if _report_retrieval is None:
         r = ReportRetrieval(persist_root=str(_REPORT_PERSIST))
@@ -55,23 +54,24 @@ class Agent:
         self.report_retrieval = _get_report_retrieval()
         self.chat_store = ChatStore(chat_id=chat_id)
         self.llm = llm
-        # self.intent = IntentGatekeeper()
+        self.analyst = Analyst(llm)
+        self.db = DBService()  # MySQL连接，见db_service.py
 
     def build_history_text(self, limit: int = 6) -> str:
-        history: list[dict] = self.chat_store.get_history()
+        history = self.chat_store.get_history()
         if not history:
             return ""
-        recent = history[-limit:]
         return "\n".join(
-            [f"{m.get('role', 'unknown')}: {m.get('content', '')}" for m in recent]
+            f"{m.get('role', 'unknown')}: {m.get('content', '')}"
+            for m in history[-limit:]
         )
 
-    def build_prompt(self, question: str) -> str:
-        rag_result: dict = self.rag.retrieve(question)
+    def build_sql_prompt(self, question: str) -> str:
+        rag_result = self.rag.retrieve(question)
         similar_questions = rag_result.get("similar_questions", [])
         relevant_fields = rag_result.get("relevant_fields", [])
-
         relevant_preferences = self.memory.search_preference(question, top_k=3)
+
         example_lines = [
             f"[示例{i}] 问题：{item.get('text', '')} SQL：{item.get('sql', '')}"
             for i, item in enumerate(similar_questions, 1)
@@ -81,18 +81,10 @@ class Agent:
             for i, item in enumerate(relevant_fields, 1)
         ]
 
-        report_refs = []
-        if self.report_retrieval.index is not None:
-            report_refs = self.report_retrieval.search_reports(question, top_k=3)
-        report_lines = [
-            f"[研报{i}] {r.get('org_name', '')} {r.get('publish_date', '')} {r.get('stock_name', '')}: {r.get('text', '')}"
-            for i, r in enumerate(report_refs, 1)
-        ]
-
         prompt = f"""
         你是一个资深的金融数据分析师。
 
-        【用户专属偏好记忆（请尽量迎合）】:
+        【用户专属偏好记忆】:
         {chr(10).join([f"- {p}" for p in relevant_preferences]) if relevant_preferences else "无"}
 
         【当前问题】:
@@ -104,44 +96,114 @@ class Agent:
         【相关数据库字段】:
         {chr(10).join(field_lines) if field_lines else "无"}
 
-        【相关研报参考】:
-        {chr(10).join(report_lines) if report_lines else "无"}
-
         请直接输出一条可执行的 MySQL SQL。不要解释。
         """
 
-        logger.info(f"RAG生成的提示词：\n{prompt}")
         return prompt.strip()
 
     def get_report_references(self, question: str) -> list:
-        """返回赛题 references 格式的研报引用"""
+        """获取赛题references格式的研报引用"""
         if self.report_retrieval.index is None:
             return []
         return self.report_retrieval.search_reports(question, top_k=3)
 
-    def run(self, question: str) -> str:
-        # history: str = self.build_history_text()
-        # slots = self.intent.analyze(question, history)
+    def run(self, question: str, problem_id: str = "B0000", task: int = 2) -> dict:
+        """
+        完整pipeline，返回赛题要求的格式
 
-        # if not slots.is_complete:
-        # return f"-- 信息不足: {slots.missing_reason or '请补充公司、年份、报告期、指标'}"
+        Args:
+            question:   用户问题
+            problem_id: 问题编号，用于图表命名
+            task:       2=任务二，3=任务三
 
-        logger.info(f"用户输入自然语言：{question}")
+        Returns:
+            {
+                "Q": question,
+                "A": {
+                    "content": "分析文字",
+                    "image": ["./result/B1002_1.jpg"],
+                    "sql": "SELECT ...",           # 附加字段，方便调试
+                    "references": [...],           # 仅任务三有
+                }
+            }
+        """
+        logger.info(f"[Agent.run] 问题={question}, task={task}")
 
-        prompt = self.build_prompt(question)
-
-        sql = self.llm.chat(prompt).strip()
+        # ========== Step1: 生成SQL ==========
+        sql_prompt = self.build_sql_prompt(question)
+        sql = self.llm.chat(sql_prompt).strip()
         sql = sql.replace("```sql", "").replace("```", "").strip()
+        logger.info(f"[Agent.run] 生成SQL={sql}")
 
-        # 存入上下文 JSON
+        # ========== Step2: 执行SQL ==========
+        sql_result: Any = []
+        if sql and not sql.startswith("--"):
+            try:
+                sql_result = self.db.execute(sql)
+                logger.info(f"[Agent.run] SQL执行成功，返回{len(sql_result)}行")
+            except Exception as e:
+                logger.warning(f"[Agent.run] SQL执行失败: {e}")
+                sql_result = []
+
+        # ========== Step3: 检索研报 ==========
+        report_refs = []
+        if task == 3:
+            report_refs = self.get_report_references(question)
+            logger.info(f"[Agent.run] 研报检索到{len(report_refs)}条")
+
+        # ========== Step4: 生成分析文字 ==========
+        if sql_result:
+            content = self.analyst.analyze(
+                question=question,
+                sql_result=sql_result,
+                report_refs=report_refs,
+            )
+        else:
+            # SQL无结果时，尝试直接用研报回答（适合任务三意图模糊场景）
+            if report_refs:
+                content = self.analyst.analyze(
+                    question=question,
+                    sql_result="数据库中未查询到相关数据",
+                    report_refs=report_refs,
+                )
+            else:
+                content = "未能查询到相关数据，请确认公司名称和报告期是否正确。"
+
+        # ========== Step5: 生成图表 ==========
+        image_path = ""
+        if isinstance(sql_result, list) and len(sql_result) > 0:
+            image_path = draw_chart(
+                question=question,
+                sql_result=sql_result,
+                problem_id=problem_id,
+                seq=1,
+            )
+
+        # ========== Step6: 存历史 ==========
         self.chat_store.append_messages(
             [
                 {"role": "user", "content": question},
-                {"role": "assistant", "content": sql},
+                {"role": "assistant", "content": content},
             ]
         )
-
-        if sql and not sql.startswith("-- 信息不足"):
+        if sql and not sql.startswith("--"):
             self.rag.add_user_interaction(question, sql)
 
-        return sql
+        # ========== Step7: 组装返回值 ==========
+        answer: dict = {
+            "content": content,
+            "image": [image_path] if image_path else [],
+            "sql": sql,
+        }
+
+        if task == 3 and report_refs:
+            answer["references"] = [
+                {
+                    "paper_path": r.get("paper_path", ""),
+                    "text": r.get("text", "")[:300],
+                    "paper_image": r.get("paper_image", ""),
+                }
+                for r in report_refs
+            ]
+
+        return {"Q": question, "A": answer}

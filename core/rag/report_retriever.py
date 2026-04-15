@@ -40,7 +40,7 @@ class ReportRetrieval(Retrieval):
             doc = fitz.open(str(pdf_path))
             text = ""
             for page in doc:
-                text += page.get_text()
+                text += str(page.get_text())
             doc.close()
             return text.strip()
         except Exception as e:
@@ -241,10 +241,7 @@ class ReportRetrieval(Retrieval):
 
         added = set(current) - set(manifest)
         removed = set(manifest) - set(current)
-        modified = {
-            p for p in current
-            if p in manifest and current[p] != manifest[p]
-        }
+        modified = {p for p in current if p in manifest and current[p] != manifest[p]}
 
         if not added and not removed and not modified and self.index is not None:
             logger.info("研报文件无变化，跳过索引重建")
