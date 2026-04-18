@@ -221,64 +221,92 @@ def run_screen(
     max_tokens: int,
     gpu_memory_utilization: float,
     doc_filter: list[str] | None = None,
+    screen_batch_size: int = 256,
 ) -> None:
     from vllm_service import LLM
 
     convert_waiting_chunk(waiting_chunk_root, waiting_markdown_root)
 
-    llm = LLM(
-        _modelpath=model_path,
-        _temperature=temperature,
-        _top_p=top_p,
-        _max_tokens=min(max_tokens, 4),  # YES/NO 只需 1-2 token
-        _gpu_memory_utilization=gpu_memory_utilization,
-        _enable_thinking=False,
-        _max_model_len=8192,  # 6000字chunk + rule_text + 指令头，留足余量
-    )
-    llm.load_model()
+    # ── 断点续传：加载已有结果，跳过已筛 chunk ────────────────────────────────
+    results: list[dict[str, str]] = []
+    done: set[tuple[str, str]] = set()  # (doc_id, chunk_id)
+    if results_file.exists():
+        try:
+            existing = json.loads(results_file.read_text(encoding="utf-8"))
+            if isinstance(existing, list):
+                results = existing
+                done = {(r["doc_id"], r["chunk_id"]) for r in results}
+                print(f"[断点续传] 已加载 {len(done)} 条历史结果，将跳过这些 chunk")
+        except Exception as e:
+            print(f"[断点续传] 读取历史结果失败，将从头开始: {e}")
 
-    # 收集所有任务
-    tasks: list[tuple[str, Path, Path]] = []  # (doc_id, chunk_md_file, chunk_json_file)
-    for doc_dir in sorted(path for path in waiting_markdown_root.iterdir() if path.is_dir()):
+    # ── 收集待处理任务（排除已完成）────────────────────────────────────────────
+    tasks: list[tuple[str, Path, Path]] = []
+    for doc_dir in sorted(p for p in waiting_markdown_root.iterdir() if p.is_dir()):
         doc_id = doc_dir.name
         if doc_filter and not any(doc_id == f or doc_id.startswith(f) for f in doc_filter):
             continue
         for chunk_md_file in sorted(doc_dir.glob("chunk_*.md")):
+            if (doc_id, chunk_md_file.stem) in done:
+                continue
             chunk_json_file = waiting_chunk_root / doc_id / f"{chunk_md_file.stem}.json"
             tasks.append((doc_id, chunk_md_file, chunk_json_file))
 
-    prompts = [
-        build_screen_prompt(chunk_md_file.read_text(encoding="utf-8"), rule_text)
-        for _, chunk_md_file, _ in tasks
-    ]
-    print(f"共 {len(prompts)} 个 chunk，开始批量初筛...")
+    if not tasks:
+        print("所有 chunk 已筛选完毕，无需重新处理。")
+        return
 
-    results: list[dict[str, str]] = []
+    total = len(tasks)
+    print(f"共 {total} 个 chunk 待初筛（每批 {screen_batch_size}）...")
+
+    llm = LLM(
+        _modelpath=model_path,
+        _temperature=temperature,
+        _top_p=top_p,
+        _max_tokens=min(max_tokens, 4),
+        _gpu_memory_utilization=gpu_memory_utilization,
+        _enable_thinking=False,
+        _max_model_len=8192,
+    )
+    llm.load_model()
+
     try:
-        raw_answers = llm.batch_chat(prompts)
+        for batch_start in range(0, total, screen_batch_size):
+            batch = tasks[batch_start: batch_start + screen_batch_size]
+            batch_num = batch_start // screen_batch_size + 1
+            total_batches = (total + screen_batch_size - 1) // screen_batch_size
+            print(f"--- batch {batch_num}/{total_batches}  ({len(batch)} chunks) ---")
+
+            prompts = [
+                build_screen_prompt(chunk_md_file.read_text(encoding="utf-8"), rule_text)
+                for _, chunk_md_file, _ in batch
+            ]
+            raw_answers = llm.batch_chat(prompts)
+
+            for (doc_id, chunk_md_file, chunk_json_file), raw_answer in zip(batch, raw_answers):
+                screen_result = normalize_screen_result(raw_answer)
+                copied_to = ""
+                if screen_result == "YES":
+                    copied_to = str(copy_yes_chunk(chunk_json_file, new_chunk_root, doc_id).resolve())
+                results.append({
+                    "doc_id": doc_id,
+                    "chunk_id": chunk_md_file.stem,
+                    "chunk_markdown_path": str(chunk_md_file.resolve()),
+                    "chunk_json_path": str(chunk_json_file.resolve()),
+                    "raw_answer": raw_answer.strip(),
+                    "screen_result": screen_result,
+                    "copied_to": copied_to,
+                })
+                print(f"[{screen_result}] {doc_id} / {chunk_md_file.stem}")
+
+            # 每批结束后立即存档，断电/超时也不丢进度
+            write_json(results, results_file)
+            done_count = batch_start + len(batch)
+            print(f"[checkpoint] 已保存 {done_count}/{total} 条结果 → {results_file}")
     finally:
         llm.unload_model()
 
-    for (doc_id, chunk_md_file, chunk_json_file), raw_answer in zip(tasks, raw_answers):
-        screen_result = normalize_screen_result(raw_answer)
-        copied_to = ""
-        if screen_result == "YES":
-            copied_to = str(copy_yes_chunk(chunk_json_file, new_chunk_root, doc_id).resolve())
-        results.append(
-            {
-                "doc_id": doc_id,
-                "chunk_id": chunk_md_file.stem,
-                "chunk_markdown_path": str(chunk_md_file.resolve()),
-                "chunk_json_path": str(chunk_json_file.resolve()),
-                "raw_answer": raw_answer.strip(),
-                "screen_result": screen_result,
-                "copied_to": copied_to,
-            }
-        )
-        print(f"[{screen_result}] {doc_id} / {chunk_md_file.stem}")
-
-    write_json(results, results_file)
-    print(f"已生成初筛结果 {results_file}")
+    print(f"初筛完成，共 {len(results)} 条结果 → {results_file}")
 
 
 def run_prepare(

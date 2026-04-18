@@ -1,13 +1,15 @@
 # core/agent/pipeline.py
 
 
+import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
 from core.agent.analyst import Analyst
 from core.agent.intent_manager import IntentGatekeeper
-from core.agent.visualizer import draw_chart
+from core.agent.visualizer import _detect_chart_type, draw_chart
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.report_retriever import ReportRetrieval
 from core.rag.sql_retriever import DualRetrieval
@@ -114,6 +116,117 @@ class Agent:
 
         return prompt.strip()
 
+    def _decompose_intents(self, question: str) -> list[str]:
+        """
+        用分析模型将多意图问题拆解为有序子问题列表。
+        单意图问题返回 [question]。
+        """
+        prompt = (
+            "你是一个查询规划器。请将用户的问题拆解为2-5个可独立执行SQL查询的子问题，"
+            "每个子问题只包含一个查询意图。\n"
+            "如果问题本身是单一意图，直接输出原问题即可。\n"
+            "严格以JSON数组格式输出，例如：[\"子问题1\", \"子问题2\"]\n"
+            "只输出JSON数组，不要任何解释。\n\n"
+            f"用户问题：{question}"
+        )
+        try:
+            raw = self.analyst.llm.chat(prompt).strip()
+            match = re.search(r"\[.*?\]", raw, re.DOTALL)
+            if match:
+                parsed = json.loads(match.group())
+                if isinstance(parsed, list) and all(isinstance(q, str) for q in parsed):
+                    result = [q.strip() for q in parsed if q.strip()]
+                    if result:
+                        return result
+        except Exception as e:
+            logger.warning(f"[Agent] 意图拆解失败: {e}")
+        return [question]
+
+    def _run_multi_intent(
+        self,
+        question: str,
+        sub_questions: list[str],
+        problem_id: str,
+        history_text: str,
+    ) -> dict:
+        """执行多意图子任务，合并结果，返回标准 Q/A dict。"""
+        sub_results: list[dict] = []
+        for sub_q in sub_questions:
+            sql_prompt = self.build_sql_prompt(sub_q, history_text)
+            sql = self.sql_llm.chat(sql_prompt).strip()
+            sql = sql.replace("```sql", "").replace("```", "").strip()
+            data: list = []
+            if sql and not sql.startswith("--"):
+                try:
+                    data = self.db.execute(sql)
+                except Exception as e:
+                    logger.warning(f"[Agent] 子任务SQL失败 ({sub_q[:30]}): {e}")
+            sub_results.append({"sub_q": sub_q, "sql": sql, "data": data})
+            logger.info(f"[Agent] 子任务完成: {sub_q[:40]}, 返回{len(data)}行")
+
+        report_refs = self.get_report_references(question)
+
+        content = self.analyst.analyze_multi(question, sub_results, report_refs)
+
+        # 为有数据的子任务依次绘图（最多3张）
+        image_paths: list[str] = []
+        chart_type = "none"
+        seq = 1
+        for sr in sub_results:
+            if not sr["data"]:
+                continue
+            ct = _detect_chart_type(sr["sub_q"], sr["data"])
+            if ct == "none":
+                continue
+            if chart_type == "none":
+                chart_type = ct
+            path = draw_chart(
+                question=sr["sub_q"],
+                sql_result=sr["data"],
+                problem_id=problem_id,
+                seq=seq,
+            )
+            if path:
+                image_paths.append(path)
+                seq += 1
+            if seq > 3:
+                break
+
+        # 存对话历史
+        self.chat_store.append_messages([
+            {"role": "user", "content": question},
+            {"role": "assistant", "content": content},
+        ])
+        first_sql = next(
+            (sr["sql"] for sr in sub_results if sr["sql"] and not sr["sql"].startswith("--")),
+            "",
+        )
+        if first_sql:
+            self.rag.add_user_interaction(question, first_sql)
+
+        combined_sql = "\n\n".join(
+            f"-- {sr['sub_q']}\n{sr['sql']}"
+            for sr in sub_results
+            if sr["sql"] and not sr["sql"].startswith("--")
+        )
+
+        answer: dict = {
+            "content": content,
+            "image": image_paths,
+            "sql": combined_sql,
+            "chart_type": chart_type,
+        }
+        if report_refs:
+            answer["references"] = [
+                {
+                    "paper_path": r.get("paper_path", ""),
+                    "text": r.get("text", "")[:300],
+                    "paper_image": r.get("paper_image", ""),
+                }
+                for r in report_refs
+            ]
+        return {"Q": question, "A": answer}
+
     def get_report_references(self, question: str) -> list:
         """获取赛题references格式的研报引用"""
         if self.report_retrieval.index is None:
@@ -142,17 +255,27 @@ class Agent:
         """
         logger.info(f"[Agent.run] 问题={question}, task={task}")
 
-        # ========== Step0: 意图完整性检测 ==========
         history_text = self.build_history_text()
-        slots = self.gatekeeper.analyze(question, history_text)
-        if not slots.is_complete:
-            hint = slots.missing_reason or "请补充查询所需的公司名称、年份、报告期和财务指标。"
-            self.chat_store.append_messages([
-                {"role": "user", "content": question},
-                {"role": "assistant", "content": hint},
-            ])
-            logger.info(f"[Agent.run] 意图不完整，已拦截: {hint}")
-            return {"Q": question, "A": {"content": hint, "image": [], "sql": ""}}
+
+        # ========== Step0: 意图完整性检测（仅任务二）==========
+        # 任务三问题常无具体公司名（发现类/模糊意图），跳过 gatekeeper
+        if task == 2:
+            slots = self.gatekeeper.analyze(question, history_text)
+            if not slots.is_complete:
+                hint = slots.missing_reason or "请补充查询所需的公司名称、年份、报告期和财务指标。"
+                self.chat_store.append_messages([
+                    {"role": "user", "content": question},
+                    {"role": "assistant", "content": hint},
+                ])
+                logger.info(f"[Agent.run] 意图不完整，已拦截: {hint}")
+                return {"Q": question, "A": {"content": hint, "image": [], "sql": "", "chart_type": "none"}}
+
+        # ========== Step0b: 多意图规划（任务三）==========
+        if task == 3:
+            sub_questions = self._decompose_intents(question)
+            if len(sub_questions) > 1:
+                logger.info(f"[Agent.run] 多意图拆解为{len(sub_questions)}个子任务")
+                return self._run_multi_intent(question, sub_questions, problem_id, history_text)
 
         # ========== Step1: 生成SQL ==========
         sql_prompt = self.build_sql_prompt(question, history_text)
@@ -196,7 +319,9 @@ class Agent:
 
         # ========== Step5: 生成图表 ==========
         image_path = ""
+        chart_type = "none"
         if isinstance(sql_result, list) and len(sql_result) > 0:
+            chart_type = _detect_chart_type(question, sql_result)
             image_path = draw_chart(
                 question=question,
                 sql_result=sql_result,
@@ -219,6 +344,7 @@ class Agent:
             "content": content,
             "image": [image_path] if image_path else [],
             "sql": sql,
+            "chart_type": chart_type,
         }
 
         if task == 3 and report_refs:

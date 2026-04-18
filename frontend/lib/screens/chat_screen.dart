@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photo_view/photo_view.dart';
 import '../models/chat_message.dart';
 import '../services/api_service.dart';
+import 'login_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -23,34 +24,17 @@ class _ChatScreenState extends State<ChatScreen> {
     )
   ];
   bool _isLoading = false;
-  bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
     _chatId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
     ApiService.bindActiveChat(_chatId);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showLoginDialog();
-    });
-  }
-
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => _LoginDialog(
-        onSuccess: () {
-          Navigator.of(context).pop();
-          setState(() => _isLoggedIn = true);
-        },
-      ),
-    );
   }
 
   void _sendMessage() async {
     final text = _textController.text.trim();
-    if (text.isEmpty || _isLoading || !_isLoggedIn) return;
+    if (text.isEmpty || _isLoading) return;
 
     _textController.clear();
 
@@ -60,12 +44,23 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     _scrollToBottom();
 
-    final String reply = await ApiService.sendMessage(text, chatId: _chatId);
+    final Map<String, dynamic> reply = await ApiService.sendMessage(text, chatId: _chatId);
 
     if (mounted) {
+      final imageList = (reply['image'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList();
+      final refList = (reply['references'] as List<dynamic>?)
+          ?.map((e) => ChatReference.fromJson(e as Map<String, dynamic>))
+          .toList();
       setState(() {
         _isLoading = false;
-        _messages.add(ChatMessage(text: reply, isUser: false));
+        _messages.add(ChatMessage(
+          text: reply['content']?.toString() ?? '',
+          isUser: false,
+          images: imageList,
+          references: refList,
+        ));
       });
       _scrollToBottom();
     }
@@ -121,18 +116,20 @@ class _ChatScreenState extends State<ChatScreen> {
           centerTitle: true,
           elevation: 2,
           actions: [
-            if (_isLoggedIn)
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                tooltip: "退出登录",
-                onPressed: () async {
-                  await ApiService.logout(chatId: _chatId);
-                  if (mounted) {
-                    setState(() => _isLoggedIn = false);
-                    _showLoginDialog();
-                  }
-                },
-              ),
+            IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              tooltip: "退出登录",
+              onPressed: () async {
+                await ApiService.logout(chatId: _chatId);
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (_) => false,
+                  );
+                }
+              },
+            ),
           ],
         ),
         body: Column(
@@ -377,11 +374,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
-                enabled: _isLoggedIn,
-                decoration: InputDecoration(
-                  hintText: _isLoggedIn
-                      ? "向智能助手提问，例如：贵州茅台去年的净利润是多少？"
-                      : "请先登录...",
+                decoration: const InputDecoration(
+                  hintText: "向智能助手提问，例如：贵州茅台去年的净利润是多少？",
                   hintStyle:
                       TextStyle(color: Colors.grey.shade400, fontSize: 14),
                   filled: true,
@@ -397,14 +391,12 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(width: 8),
             Container(
-              decoration: BoxDecoration(
-                color: _isLoggedIn
-                    ? const Color(0xFF1E3A8A)
-                    : Colors.grey.shade400,
+              decoration: const BoxDecoration(
+                color: Color(0xFF1E3A8A),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: (_isLoading || !_isLoggedIn) ? null : _sendMessage,
+                onPressed: _isLoading ? null : _sendMessage,
                 icon: const Icon(Icons.send_rounded, color: Colors.white),
                 tooltip: "发送",
               ),
@@ -416,140 +408,3 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class _LoginDialog extends StatefulWidget {
-  final VoidCallback onSuccess;
-
-  const _LoginDialog({required this.onSuccess});
-
-  @override
-  State<_LoginDialog> createState() => _LoginDialogState();
-}
-
-class _LoginDialogState extends State<_LoginDialog> {
-  final _companyController = TextEditingController();
-  final _userController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  @override
-  void dispose() {
-    _companyController.dispose();
-    _userController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _login() async {
-    final company = _companyController.text.trim();
-    final user = _userController.text.trim();
-    final password = _passwordController.text;
-
-    if (company.isEmpty || user.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = '请填写所有字段');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final result = await ApiService.login(
-      companyId: company,
-      userId: user,
-      password: password,
-    );
-
-    if (!mounted) return;
-
-    if (result.success) {
-      widget.onSuccess();
-    } else {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = result.message;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
-        children: [
-          Icon(Icons.bar_chart_rounded, color: Color(0xFF1E3A8A)),
-          SizedBox(width: 8),
-          Text("登录", style: TextStyle(color: Color(0xFF1E3A8A))),
-        ],
-      ),
-      content: SizedBox(
-        width: 320,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _companyController,
-              decoration: const InputDecoration(
-                labelText: "公司ID",
-                prefixIcon: Icon(Icons.business),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _userController,
-              decoration: const InputDecoration(
-                labelText: "用户ID",
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              onSubmitted: (_) => _login(),
-              decoration: const InputDecoration(
-                labelText: "密码",
-                prefixIcon: Icon(Icons.lock),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontSize: 13),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: _isLoading ? null : _login,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : const Text("登录", style: TextStyle(fontSize: 16)),
-          ),
-        ),
-      ],
-    );
-  }
-}

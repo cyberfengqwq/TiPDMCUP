@@ -114,14 +114,16 @@ class ApiService {
     }
   }
 
-  static Future<String> sendMessage(String prompt, {
+  static Future<Map<String, dynamic>> sendMessage(String prompt, {
     required String chatId,
+    String problemId = 'B0000',
+    int task = 2,
     bool isEnd = false,
   }) async {
     try {
       final sessionId = _currentSession?.sessionId;
       if (sessionId == null || sessionId.isEmpty) {
-        return '未登录或会话已失效，请重新登录';
+        return {'content': '未登录或会话已失效，请重新登录', 'image': [], 'references': []};
       }
 
       final response = await http.post(
@@ -133,6 +135,8 @@ class ApiService {
         body: jsonEncode({
           'prompt': prompt,
           'chat_id': chatId,
+          'problem_id': problemId,
+          'task': task,
           'is_end': isEnd,
         }),
       );
@@ -142,22 +146,23 @@ class ApiService {
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         try {
-          final jsonResponse = jsonDecode(decodedBody) as Map<String, dynamic>;
-          return jsonResponse['answer']?.toString() ?? '无返回内容';
+          return jsonDecode(decodedBody) as Map<String, dynamic>;
         } catch (_) {
-          return decodedBody;
+          return {'content': decodedBody, 'image': [], 'references': []};
         }
       } else {
         final decodedBody = utf8.decode(response.bodyBytes);
+        String errorMsg;
         try {
           final jsonResponse = jsonDecode(decodedBody) as Map<String, dynamic>;
-          return _extractErrorMessage(jsonResponse, response.statusCode, '请求失败');
+          errorMsg = _extractErrorMessage(jsonResponse, response.statusCode, '请求失败');
         } catch (_) {
-          return '请求失败，状态码: ${response.statusCode}';
+          errorMsg = '请求失败，状态码: ${response.statusCode}';
         }
+        return {'content': errorMsg, 'image': [], 'references': []};
       }
     } catch (e) {
-      return '网络请求发生错误: $e';
+      return {'content': '网络请求发生错误: $e', 'image': [], 'references': []};
     }
   }
 

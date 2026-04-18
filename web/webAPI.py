@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
@@ -98,6 +99,8 @@ class ChatRequest(BaseModel):
 
     prompt: str
     chat_id: str = Field(..., description="前端对话窗口ID")
+    problem_id: str = Field("B0000", description="赛题问题编号，用于图表命名")
+    task: int = Field(2, description="任务编号：2=任务二，3=任务三")
     is_end: bool = Field(False, description="是否结束本次会话（用于触发画像更新）")
 
 
@@ -106,7 +109,9 @@ class ChatResponse(BaseModel):
     对话回复
     """
 
-    answer: str
+    content: str
+    image: list[str] = []
+    references: list[Any] = []
 
 
 class LogoutRequest(BaseModel):
@@ -246,7 +251,7 @@ def chat(
         company_id=company_id,
         chat_id=payload.chat_id,
     )
-    answer = agent.run(payload.prompt)
+    result = agent.run(payload.prompt, problem_id=payload.problem_id, task=payload.task)
 
     if payload.is_end:
         agent_manager.destroy(payload.chat_id)
@@ -257,7 +262,12 @@ def chat(
         )
         background_tasks.add_task(profile_service.sum_and_update_profile)
 
-    return ChatResponse(answer=str(answer))
+    a = result.get("A", {})
+    return ChatResponse(
+        content=a.get("content", ""),
+        image=a.get("image", []),
+        references=a.get("references", []),
+    )
 
 
 @app.post("/logout")

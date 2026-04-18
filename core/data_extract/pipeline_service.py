@@ -72,6 +72,7 @@ class Pipeline:
         temperature: float = 0.1,
         top_p: float = 0.8,
         screen_max_tokens: int = 32,
+        screen_batch_size: int = 256,
         extract_max_tokens: int = 8192,
         gpu_memory_utilization: float = 0.63,
         separator: str = "\n---\n",
@@ -89,6 +90,7 @@ class Pipeline:
         self.temperature = temperature
         self.top_p = top_p
         self.screen_max_tokens = screen_max_tokens
+        self.screen_batch_size = screen_batch_size
         self.extract_max_tokens = extract_max_tokens
         self.gpu_memory_utilization = gpu_memory_utilization
         self.separator = separator
@@ -145,6 +147,7 @@ class Pipeline:
             max_tokens=self.screen_max_tokens,
             gpu_memory_utilization=self.gpu_memory_utilization,
             doc_filter=doc_filter,
+            screen_batch_size=self.screen_batch_size,
         )
 
     def rebuild(self) -> None:
