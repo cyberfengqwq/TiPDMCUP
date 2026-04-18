@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from core.agent.analyst import Analyst
+from core.agent.intent_manager import IntentGatekeeper
 from core.agent.visualizer import draw_chart
 from core.rag.memory_retrieval import UserProfileRetrieval
 from core.rag.report_retriever import ReportRetrieval
@@ -27,6 +28,14 @@ _STOCK_META = _REPORT_DATA_ROOT / "个股_研报信息.xlsx"
 _INDUSTRY_META = _REPORT_DATA_ROOT / "行业_研报信息.xlsx"
 
 _report_retrieval: ReportRetrieval | None = None
+_gatekeeper: IntentGatekeeper | None = None
+
+
+def _get_gatekeeper() -> IntentGatekeeper:
+    global _gatekeeper
+    if _gatekeeper is None:
+        _gatekeeper = IntentGatekeeper()
+    return _gatekeeper
 
 
 def _get_report_retrieval() -> ReportRetrieval:
@@ -44,18 +53,19 @@ def _get_report_retrieval() -> ReportRetrieval:
 
 
 class Agent:
-    def __init__(self, user_id: str, company_id: str, chat_id: str, llm: LLM) -> None:
+    def __init__(self, user_id: str, company_id: str, chat_id: str, sql_llm: LLM, analysis_llm: LLM) -> None:
         self.user_id = user_id
         self.company_id = company_id
         self.chat_id = chat_id
 
-        self.rag = DualRetrieval(user_id=user_id, company_id=company_id)
+        self.rag = DualRetrieval(user_id=user_id)
         self.memory = UserProfileRetrieval(user_id=user_id)
         self.report_retrieval = _get_report_retrieval()
         self.chat_store = ChatStore(chat_id=chat_id)
-        self.llm = llm
-        self.analyst = Analyst(llm)
-        self.db = DBService()  # MySQL连接，见db_service.py
+        self.sql_llm = sql_llm
+        self.analyst = Analyst(analysis_llm)
+        self.db = DBService()
+        self.gatekeeper = _get_gatekeeper()
 
     def build_history_text(self, limit: int = 6) -> str:
         history = self.chat_store.get_history()
@@ -66,7 +76,7 @@ class Agent:
             for m in history[-limit:]
         )
 
-    def build_sql_prompt(self, question: str) -> str:
+    def build_sql_prompt(self, question: str, history_text: str = "") -> str:
         rag_result = self.rag.retrieve(question)
         similar_questions = rag_result.get("similar_questions", [])
         relevant_fields = rag_result.get("relevant_fields", [])
@@ -83,6 +93,9 @@ class Agent:
 
         prompt = f"""
         你是一个资深的金融数据分析师。
+
+        【本轮对话历史】:
+        {history_text if history_text.strip() else "无"}
 
         【用户专属偏好记忆】:
         {chr(10).join([f"- {p}" for p in relevant_preferences]) if relevant_preferences else "无"}
@@ -129,9 +142,21 @@ class Agent:
         """
         logger.info(f"[Agent.run] 问题={question}, task={task}")
 
+        # ========== Step0: 意图完整性检测 ==========
+        history_text = self.build_history_text()
+        slots = self.gatekeeper.analyze(question, history_text)
+        if not slots.is_complete:
+            hint = slots.missing_reason or "请补充查询所需的公司名称、年份、报告期和财务指标。"
+            self.chat_store.append_messages([
+                {"role": "user", "content": question},
+                {"role": "assistant", "content": hint},
+            ])
+            logger.info(f"[Agent.run] 意图不完整，已拦截: {hint}")
+            return {"Q": question, "A": {"content": hint, "image": [], "sql": ""}}
+
         # ========== Step1: 生成SQL ==========
-        sql_prompt = self.build_sql_prompt(question)
-        sql = self.llm.chat(sql_prompt).strip()
+        sql_prompt = self.build_sql_prompt(question, history_text)
+        sql = self.sql_llm.chat(sql_prompt).strip()
         sql = sql.replace("```sql", "").replace("```", "").strip()
         logger.info(f"[Agent.run] 生成SQL={sql}")
 

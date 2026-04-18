@@ -37,22 +37,6 @@ class CompanyStore(BaseJsonStore):
 
         return companies
 
-    def get_by_id(self, company_id: str) -> Company | None:
-        """通过 id 查找公司
-
-        Args:
-            company_id: str 输入的公司 id
-
-        Returns:
-            Company   : 若找到对应 id 的公司
-            None      : 没有对应 id 的公司
-
-        """
-        for company in self.load_all():
-            if company_id == company.id:
-                return company
-        return None
-
     def save_all(self, companies: list[Company]) -> None:
         """保存所有公司信息到 Json 文件
 

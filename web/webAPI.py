@@ -12,7 +12,6 @@ from starlette import status
 from core.agent.agent_manager import agent_manager
 from core.domain.models import SessionPrincipal
 from core.services.auth_service import AuthService
-from core.services.company_registry import CompanyRegistry
 from core.services.profile_service import ProfileService
 from core.services.vllm_service import LLM
 from core.stores.company_store import CompanyStore
@@ -38,10 +37,8 @@ company_store = CompanyStore(COMPANY_JSON)
 membership_store = MembershipStore(MEMBERSHIP_JSON)
 session_store = SessionStore(SESSION_JSON)
 
-company_registry = CompanyRegistry(company_store)
-company_registry.reload()
-
 llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
+
 
 auth_service = AuthService(
     user_store=user_store,
@@ -260,7 +257,7 @@ def chat(
         )
         background_tasks.add_task(profile_service.sum_and_update_profile)
 
-    return ChatResponse(answer=answer)
+    return ChatResponse(answer=str(answer))
 
 
 @app.post("/logout")

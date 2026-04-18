@@ -1,8 +1,35 @@
+# 环境与密钥
 .env
 .zed/
 .vscode/
 
+# 模型权重
 models/
 *.bin
 *.safetensors
 *.gguf
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行时数据（不入库）
+data/chats/
+data/output/
+data/users/
+data/faiss_global/
+data/faiss_report_store/
+data/db/sessions.json
+data/db/temp/
+
+# 数据提取中间产物
+core/data_extract/extract_workspace/
+core/data_extract/temp/
+core/data_extract/root_o/
+
+# 临时文件
+temp/
+root_o/
+*.tmp
+.DS_Store

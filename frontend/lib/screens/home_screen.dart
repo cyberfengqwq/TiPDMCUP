@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pages = [
-      ChatScreen(session: widget.session),
+      const ChatScreen(),
       ProfileScreen(session: widget.session),
     ];
   }

@@ -315,21 +315,16 @@ class FieldDataRetrieval(Retrieval):
 class DualRetrieval:
     """双重检索器：同时检索用户历史问题和数据库字段信息"""
 
-    _field_retrievals: dict = {}
+    _field_retrieval: "FieldDataRetrieval | None" = None
     _lock = threading.Lock()
 
     def __init__(
         self,
         model_name: str = "BAAI/bge-m3",
         user_id: str = "",
-        company_id: str = "default_company",
-        persist_root: Path = ROOT_DIR / "data" / "companies",
+        persist_root: Path = ROOT_DIR / "data" / "faiss_global",
     ):
-        persist_root.mkdir(exist_ok=True, parents=True)
-        self.persist_root = persist_root
-
         self.user_id = user_id
-        self.company_id = company_id
 
         user_store_path: Path = ROOT_DIR / "data" / "users"
         user_store_path.mkdir(exist_ok=True, parents=True)
@@ -341,18 +336,15 @@ class DualRetrieval:
         )
 
         with DualRetrieval._lock:
-            if company_id not in DualRetrieval._field_retrievals:
-                company_store_path: Path = (
-                    self.persist_root / company_id / "faiss_store"
-                )
-                DualRetrieval._field_retrievals[company_id] = FieldDataRetrieval(
-                    model_name=model_name, persist_root=str(company_store_path)
+            if DualRetrieval._field_retrieval is None:
+                persist_root.mkdir(exist_ok=True, parents=True)
+                DualRetrieval._field_retrieval = FieldDataRetrieval(
+                    model_name=model_name, persist_root=str(persist_root)
                 )
 
-        self.field_retrieval = DualRetrieval._field_retrievals[company_id]
+        self.field_retrieval = DualRetrieval._field_retrieval
 
         logger.info(f"[UserMeta] write path = {self.user_retrieval.meta_path}")
-        logger.info(f"user_meta_path = {self.user_retrieval.meta_path}")
 
     def retrieve(
         self, query: str, top_k_questions: int = 3, top_k_fields: int = 5

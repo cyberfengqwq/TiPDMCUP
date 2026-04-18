@@ -10,7 +10,8 @@ from core.services.vllm_service import LLM
 
 logger = logging.getLogger(__name__)
 
-MODEL_PATH = "/home/qwq/models/Qwen2.5-7B-Instruct"
+_ANALYSIS_MODEL_PATH = "/home/qwq/models/Qwen2.5-7B-Instruct"
+_SQL_MODEL_PATH = "/home/qwq/models/qwen2_5_7b_sql"
 
 
 @dataclass
@@ -47,16 +48,27 @@ class AgentManager:
         self._running: bool = False
         self._initialized: bool = True
 
-        # LLM单例，所有Agent共享
-        self._llm: LLM = LLM(
-            _modelpath=MODEL_PATH,
+        # 财报分析模型
+        self._analysis_llm: LLM = LLM(
+            _modelpath=_ANALYSIS_MODEL_PATH,
             _temperature=0.7,
             _top_p=0.8,
             _max_tokens=512,
-            _gpu_memory_utilization=0.63,
+            _gpu_memory_utilization=0.5,
         )
-        self._llm.load_model()
-        logger.info("[AgentManager] LLM加载完成")
+        self._analysis_llm.load_model()
+        logger.info("[AgentManager] 分析模型加载完成")
+
+        # SQL生成模型
+        self._sql_llm: LLM = LLM(
+            _modelpath=_SQL_MODEL_PATH,
+            _temperature=0.2,
+            _top_p=0.9,
+            _max_tokens=512,
+            _gpu_memory_utilization=0.3,
+        )
+        self._sql_llm.load_model()
+        logger.info("[AgentManager] SQL模型加载完成")
 
         self._start_cleanup_thread()
 
@@ -90,7 +102,8 @@ class AgentManager:
                     user_id=user_id,
                     company_id=company_id,
                     chat_id=chat_id,
-                    llm=self._llm,  # 注入共享LLM
+                    sql_llm=self._sql_llm,
+                    analysis_llm=self._analysis_llm,
                 )
                 self._agents[chat_id] = AgentEntry(
                     agent=agent,
