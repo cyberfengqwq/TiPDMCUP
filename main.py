@@ -1,7 +1,5 @@
-from web.webAPI import run_app
-
-
 def main() -> None:
+    from web.webAPI import run_app
     run_app()
 
 

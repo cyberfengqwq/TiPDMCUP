@@ -4,6 +4,7 @@
 import json
 import logging
 import re
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -11,10 +12,11 @@ from core.agent.analyst import Analyst
 from core.agent.intent_manager import IntentGatekeeper
 from core.agent.visualizer import _detect_chart_type, draw_chart
 from core.rag.memory_retrieval import UserProfileRetrieval
+from core.rag.provenance_store import ProvenanceStore
 from core.rag.report_retriever import ReportRetrieval
 from core.rag.sql_retriever import DualRetrieval
 from core.services.db_service import DBService  # MySQL执行层，见下方说明
-from core.services.vllm_service import LLM
+from core.services.vllm_service import LLM, TransformersLLM
 from core.stores.chat_store import ChatStore
 
 logging.basicConfig(level=logging.INFO)
@@ -31,6 +33,20 @@ _INDUSTRY_META = _REPORT_DATA_ROOT / "行业_研报信息.xlsx"
 
 _report_retrieval: ReportRetrieval | None = None
 _gatekeeper: IntentGatekeeper | None = None
+_provenance_store: ProvenanceStore | None = None
+_model_lock = threading.Lock()  # 同一时刻只允许一个大模型在 GPU 上运行
+
+_EXTRACTED_JSON_DIR = (
+    Path(__file__).resolve().parent.parent.parent
+    / "core" / "data_extract" / "extract_workspace" / "extracted_json"
+)
+
+
+def _get_provenance_store() -> ProvenanceStore:
+    global _provenance_store
+    if _provenance_store is None:
+        _provenance_store = ProvenanceStore(_EXTRACTED_JSON_DIR)
+    return _provenance_store
 
 
 def _get_gatekeeper() -> IntentGatekeeper:
@@ -55,7 +71,7 @@ def _get_report_retrieval() -> ReportRetrieval:
 
 
 class Agent:
-    def __init__(self, user_id: str, company_id: str, chat_id: str, sql_llm: LLM, analysis_llm: LLM) -> None:
+    def __init__(self, user_id: str, company_id: str, chat_id: str, sql_llm: LLM | TransformersLLM, analysis_llm: LLM | TransformersLLM) -> None:
         self.user_id = user_id
         self.company_id = company_id
         self.chat_id = chat_id
@@ -63,6 +79,7 @@ class Agent:
         self.rag = DualRetrieval(user_id=user_id)
         self.memory = UserProfileRetrieval(user_id=user_id)
         self.report_retrieval = _get_report_retrieval()
+        self.provenance = _get_provenance_store()
         self.chat_store = ChatStore(chat_id=chat_id)
         self.sql_llm = sql_llm
         self.analyst = Analyst(analysis_llm)
@@ -150,11 +167,22 @@ class Agent:
         history_text: str,
     ) -> dict:
         """执行多意图子任务，合并结果，返回标准 Q/A dict。"""
+        # Phase 1: 一次性加载 SQL 模型，批量生成所有子问题的 SQL
+        sql_list: list[tuple[str, str]] = []
+        with _model_lock:
+            self.sql_llm.load_model()
+            try:
+                for sub_q in sub_questions:
+                    sql_prompt = self.build_sql_prompt(sub_q, history_text)
+                    sql = self.sql_llm.chat(sql_prompt).strip()
+                    sql = sql.replace("```sql", "").replace("```", "").strip()
+                    sql_list.append((sub_q, sql))
+            finally:
+                self.sql_llm.unload_model()
+
+        # Phase 2: 执行 SQL（不需要模型）
         sub_results: list[dict] = []
-        for sub_q in sub_questions:
-            sql_prompt = self.build_sql_prompt(sub_q, history_text)
-            sql = self.sql_llm.chat(sql_prompt).strip()
-            sql = sql.replace("```sql", "").replace("```", "").strip()
+        for sub_q, sql in sql_list:
             data: list = []
             if sql and not sql.startswith("--"):
                 try:
@@ -166,7 +194,20 @@ class Agent:
 
         report_refs = self.get_report_references(question)
 
-        content = self.analyst.analyze_multi(question, sub_results, report_refs)
+        # 溯源：汇总所有子任务的数据行
+        all_rows: list[dict] = []
+        for sr in sub_results:
+            all_rows.extend(sr.get("data") or [])
+        provenance_refs = self.provenance.lookup_rows(all_rows)
+        logger.info(f"[Agent._run_multi_intent] 溯源找到{len(provenance_refs)}条原文记录")
+
+        # Phase 3: 加载分析模型，合并分析
+        with _model_lock:
+            self.analyst.llm.load_model()
+            try:
+                content = self.analyst.analyze_multi(question, sub_results, report_refs)
+            finally:
+                self.analyst.llm.unload_model()
 
         # 为有数据的子任务依次绘图（最多3张）
         image_paths: list[str] = []
@@ -216,15 +257,28 @@ class Agent:
             "sql": combined_sql,
             "chart_type": chart_type,
         }
-        if report_refs:
-            answer["references"] = [
-                {
-                    "paper_path": r.get("paper_path", ""),
-                    "text": r.get("text", "")[:300],
-                    "paper_image": r.get("paper_image", ""),
-                }
-                for r in report_refs
-            ]
+
+        multi_refs: list[dict] = []
+        for p in provenance_refs:
+            multi_refs.append({
+                "type": "provenance",
+                "stock_abbr": p.get("stock_abbr", ""),
+                "metric_alias": p.get("metric_alias", ""),
+                "value_raw": p.get("value_raw", ""),
+                "table_title": p.get("table_title", ""),
+                "source_text": p.get("source_text", ""),
+                "source_chunk": p.get("source_chunk", ""),
+                "doc_id": p.get("doc_id", ""),
+            })
+        for r in report_refs:
+            multi_refs.append({
+                "type": "report",
+                "paper_path": r.get("paper_path", ""),
+                "text": r.get("text", "")[:300],
+                "paper_image": r.get("paper_image", ""),
+            })
+        if multi_refs:
+            answer["references"] = multi_refs
         return {"Q": question, "A": answer}
 
     def get_report_references(self, question: str) -> list:
@@ -272,14 +326,24 @@ class Agent:
 
         # ========== Step0b: 多意图规划（任务三）==========
         if task == 3:
-            sub_questions = self._decompose_intents(question)
+            with _model_lock:
+                self.analyst.llm.load_model()
+                try:
+                    sub_questions = self._decompose_intents(question)
+                finally:
+                    self.analyst.llm.unload_model()
             if len(sub_questions) > 1:
                 logger.info(f"[Agent.run] 多意图拆解为{len(sub_questions)}个子任务")
                 return self._run_multi_intent(question, sub_questions, problem_id, history_text)
 
         # ========== Step1: 生成SQL ==========
         sql_prompt = self.build_sql_prompt(question, history_text)
-        sql = self.sql_llm.chat(sql_prompt).strip()
+        with _model_lock:
+            self.sql_llm.load_model()
+            try:
+                sql = self.sql_llm.chat(sql_prompt).strip()
+            finally:
+                self.sql_llm.unload_model()
         sql = sql.replace("```sql", "").replace("```", "").strip()
         logger.info(f"[Agent.run] 生成SQL={sql}")
 
@@ -293,6 +357,12 @@ class Agent:
                 logger.warning(f"[Agent.run] SQL执行失败: {e}")
                 sql_result = []
 
+        # ========== Step2b: 溯源查找 ==========
+        provenance_refs = []
+        if isinstance(sql_result, list) and sql_result:
+            provenance_refs = self.provenance.lookup_rows(sql_result)
+            logger.info(f"[Agent.run] 溯源找到{len(provenance_refs)}条原文记录")
+
         # ========== Step3: 检索研报 ==========
         report_refs = []
         if task == 3:
@@ -300,22 +370,26 @@ class Agent:
             logger.info(f"[Agent.run] 研报检索到{len(report_refs)}条")
 
         # ========== Step4: 生成分析文字 ==========
-        if sql_result:
-            content = self.analyst.analyze(
-                question=question,
-                sql_result=sql_result,
-                report_refs=report_refs,
-            )
-        else:
-            # SQL无结果时，尝试直接用研报回答（适合任务三意图模糊场景）
-            if report_refs:
-                content = self.analyst.analyze(
-                    question=question,
-                    sql_result="数据库中未查询到相关数据",
-                    report_refs=report_refs,
-                )
-            else:
-                content = "未能查询到相关数据，请确认公司名称和报告期是否正确。"
+        with _model_lock:
+            self.analyst.llm.load_model()
+            try:
+                if sql_result:
+                    content = self.analyst.analyze(
+                        question=question,
+                        sql_result=sql_result,
+                        report_refs=report_refs,
+                    )
+                else:
+                    if report_refs:
+                        content = self.analyst.analyze(
+                            question=question,
+                            sql_result="数据库中未查询到相关数据",
+                            report_refs=report_refs,
+                        )
+                    else:
+                        content = "未能查询到相关数据，请确认公司名称和报告期是否正确。"
+            finally:
+                self.analyst.llm.unload_model()
 
         # ========== Step5: 生成图表 ==========
         image_path = ""
@@ -347,14 +421,32 @@ class Agent:
             "chart_type": chart_type,
         }
 
-        if task == 3 and report_refs:
-            answer["references"] = [
-                {
+        references: list[dict] = []
+
+        # 数据溯源：原文出处（任务二、三均提供）
+        for p in provenance_refs:
+            references.append({
+                "type": "provenance",
+                "stock_abbr": p.get("stock_abbr", ""),
+                "metric_alias": p.get("metric_alias", ""),
+                "value_raw": p.get("value_raw", ""),
+                "table_title": p.get("table_title", ""),
+                "source_text": p.get("source_text", ""),
+                "source_chunk": p.get("source_chunk", ""),
+                "doc_id": p.get("doc_id", ""),
+            })
+
+        # 研报引用（仅任务三）
+        if task == 3:
+            for r in report_refs:
+                references.append({
+                    "type": "report",
                     "paper_path": r.get("paper_path", ""),
                     "text": r.get("text", "")[:300],
                     "paper_image": r.get("paper_image", ""),
-                }
-                for r in report_refs
-            ]
+                })
+
+        if references:
+            answer["references"] = references
 
         return {"Q": question, "A": answer}

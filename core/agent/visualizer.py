@@ -9,7 +9,12 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
 
-matplotlib.rcParams["font.family"] = ["WenQuanYi Micro Hei", "SimHei", "DejaVu Sans"]
+from matplotlib import font_manager
+
+font_path = '/home/qwq/TiPDMCUP/SimHei.ttf'
+font_manager.fontManager.addfont(font_path)
+
+matplotlib.rcParams["font.family"] = ["SimHei"]
 matplotlib.rcParams["axes.unicode_minus"] = False
 
 logger = logging.getLogger(__name__)
@@ -131,7 +136,7 @@ def draw_chart(
             _draw_table(sql_result, question, save_path)
 
         logger.info(f"[Visualizer] 图表已保存: {save_path}")
-        return f"./result/{problem_id}_{seq}.jpg"
+        return f"/result/{problem_id}_{seq}.jpg"
 
     except Exception as e:
         logger.warning(f"[Visualizer] 绘图失败: {e}")

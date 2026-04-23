@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, ValidationError
 from config.db_schema import DATABASE_SCHEMA_DICT
 from core.services.vllm_service import LLM
 
-_INTENT_MODEL_PATH = "/home/qwq/models/Qwen3-VL-2B-sty"
+_INTENT_MODEL_PATH = "/home/qwq/TiPDMCUP/models/Qwen3-VL-2B-Intent"
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,13 @@ JSON输出："""
 
 class IntentGatekeeper:
     def __init__(self) -> None:
-        self.llm = LLM(_modelpath=_INTENT_MODEL_PATH, _gpu_memory_utilization=0.15)
+        self.llm = LLM(
+            _modelpath=_INTENT_MODEL_PATH,
+            _gpu_memory_utilization=0.15,
+            _max_model_len=4096,
+            _limit_mm_per_prompt={"image": 0, "video": 0},
+            _enforce_eager=True,
+        )
         self.llm.load_model()
         self.schema_dict = DATABASE_SCHEMA_DICT
         self.valid_metric_keys = self._collect_metric_keys()
@@ -178,7 +184,9 @@ class IntentGatekeeper:
             slots.metric = None
 
         # 重新计算 is_complete（不信任模型自己给的值）
-        complete = all([slots.company, slots.year, slots.period, slots.metric])
+        # 有年份+报告期 → 有明确的时间范围，SQL 模型可以处理公司/指标的灵活性
+        # 没有时间范围 → 查询太模糊，需要引导用户补充
+        complete = bool(slots.year and slots.period)
         slots.is_complete = complete
 
         # 如果完整但 missing_reason 不为 null，清空
@@ -187,19 +195,21 @@ class IntentGatekeeper:
 
         # 如果不完整但没有 missing_reason，自动生成
         if not complete and not slots.missing_reason:
-            missing_fields = []
-            if not slots.company:
-                missing_fields.append("公司名称")
-            if not slots.year:
-                missing_fields.append("年份")
-            if not slots.period:
-                missing_fields.append("报告期")
-            if not slots.metric:
-                missing_fields.append("财务指标")
-            slots.missing_reason = (
-                f"请补充以下信息：{'、'.join(missing_fields)}。"
-                "例如：云南白药2024年年报净利润。"
-            )
+            if slots.company and not slots.year and not slots.period:
+                slots.missing_reason = (
+                    f"请问您想查询{slots.company}哪个年份和报告期的数据？"
+                    "例如：2024年年报、2025年三季报。"
+                )
+            elif slots.year and not slots.period:
+                slots.missing_reason = (
+                    f"请问您想查询{slots.year}年的哪个报告期？"
+                    "例如：年报、三季报、半年报、一季报。"
+                )
+            else:
+                slots.missing_reason = (
+                    "请告诉我您想查询的年份和报告期，"
+                    "例如：云南白药2024年年报净利润。"
+                )
 
         logger.info(
             f"[IntentGatekeeper] 解析结果: company={slots.company}, "

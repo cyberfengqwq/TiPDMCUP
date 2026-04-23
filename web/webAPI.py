@@ -7,6 +7,7 @@ from typing import Any
 import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from starlette.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette import status
 
@@ -27,6 +28,10 @@ app = FastAPI(title="ticup", version="1.0.0")
 bearer_scheme = HTTPBearer(auto_error=False)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+RESULT_DIR = PROJECT_ROOT / "result"
+RESULT_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/result", StaticFiles(directory=str(RESULT_DIR)), name="result")
 USER_JSON = PROJECT_ROOT / "data" / "db" / "users.json"
 COMPANY_JSON = PROJECT_ROOT / "data" / "db" / "companies.json"
 MEMBERSHIP_JSON = PROJECT_ROOT / "data" / "db" / "memberships.json"
@@ -38,7 +43,7 @@ company_store = CompanyStore(COMPANY_JSON)
 membership_store = MembershipStore(MEMBERSHIP_JSON)
 session_store = SessionStore(SESSION_JSON)
 
-llm = LLM("/home/qwq/models/qwen2_5_7b_sql")
+llm = LLM("/home/qwq/TiPDMCUP/models/Qwen2.5-7B-N2SQL")
 
 
 auth_service = AuthService(

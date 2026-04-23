@@ -33,3 +33,5 @@ temp/
 root_o/
 *.tmp
 .DS_Store
+
+output/

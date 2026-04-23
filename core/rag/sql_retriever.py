@@ -37,7 +37,7 @@ class Retrieval:
         self.embedding = HuggingFaceEmbeddings(
             model_name=model_name,
             model_kwargs={
-                "device": "cuda",
+                "device": "cpu",
                 "local_files_only": True,  # 强制只读本地，不联网
                 "revision": "main",  # 锁定主分支，防止它去扫描 PR 分支
             },

@@ -2,7 +2,15 @@
 
 import json
 import logging
+from decimal import Decimal
 from typing import Any
+
+
+class _DecimalEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, Decimal):
+            return float(o)
+        return super().default(o)
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +86,10 @@ class Analyst:
             if len(sql_result) == 0:
                 sql_str = "查询结果为空"
             elif len(sql_result) <= 20:
-                sql_str = json.dumps(sql_result, ensure_ascii=False, indent=2)
+                sql_str = json.dumps(sql_result, ensure_ascii=False, indent=2, cls=_DecimalEncoder)
             else:
                 # 结果太多只取前20条
-                sql_str = json.dumps(sql_result[:20], ensure_ascii=False, indent=2)
+                sql_str = json.dumps(sql_result[:20], ensure_ascii=False, indent=2, cls=_DecimalEncoder)
                 sql_str += f"\n...（共{len(sql_result)}条，仅展示前20条）"
         else:
             sql_str = str(sql_result)

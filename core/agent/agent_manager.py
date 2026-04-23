@@ -5,13 +5,13 @@ import threading
 import time
 from dataclasses import dataclass
 
-from core.agent.pipeline import Agent
-from core.services.vllm_service import LLM
+from core.agent.pipeline import Agent, _get_gatekeeper
+from core.services.vllm_service import LLM, TransformersLLM
 
 logger = logging.getLogger(__name__)
 
-_ANALYSIS_MODEL_PATH = "/home/qwq/models/Qwen2.5-7B-Instruct"
-_SQL_MODEL_PATH = "/home/qwq/models/qwen2_5_7b_sql"
+_ANALYSIS_MODEL_PATH = "/home/qwq/TiPDMCUP/models/Qwen2.5-7B-Coder-Instruct"
+_SQL_MODEL_PATH = "/home/qwq/TiPDMCUP/models/Qwen2.5-7B-N2SQL"
 
 
 @dataclass
@@ -30,7 +30,7 @@ class AgentManager:
     DEFAULT_TIMEOUT = 30 * 60
     CLEANUP_INTERVAL = 5 * 60
 
-    def __new__(cls) -> "AgentManager":
+    def __new__(cls) -> "AgentManager": 
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -48,27 +48,27 @@ class AgentManager:
         self._running: bool = False
         self._initialized: bool = True
 
-        # 财报分析模型
-        self._analysis_llm: LLM = LLM(
+        # 财报分析模型（按需加载，用完即销毁）
+        self._analysis_llm: TransformersLLM = TransformersLLM(
             _modelpath=_ANALYSIS_MODEL_PATH,
             _temperature=0.7,
             _top_p=0.8,
             _max_tokens=512,
-            _gpu_memory_utilization=0.5,
         )
-        self._analysis_llm.load_model()
-        logger.info("[AgentManager] 分析模型加载完成")
+        logger.info("[AgentManager] 分析模型配置就绪（延迟加载）")
 
-        # SQL生成模型
-        self._sql_llm: LLM = LLM(
+        # SQL生成模型（按需加载，用完即销毁）
+        self._sql_llm: TransformersLLM = TransformersLLM(
             _modelpath=_SQL_MODEL_PATH,
             _temperature=0.2,
             _top_p=0.9,
             _max_tokens=512,
-            _gpu_memory_utilization=0.3,
         )
-        self._sql_llm.load_model()
-        logger.info("[AgentManager] SQL模型加载完成")
+        logger.info("[AgentManager] SQL模型配置就绪（延迟加载）")
+
+        # 意图识别模型（预加载，避免第一次请求时 OOM）
+        _get_gatekeeper()
+        logger.info("[AgentManager] 意图识别模型加载完成")
 
         self._start_cleanup_thread()
 
