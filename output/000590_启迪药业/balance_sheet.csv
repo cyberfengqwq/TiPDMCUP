@@ -1,0 +1,9 @@
+﻿serial_number,stock_code,stock_abbr,asset_cash_and_cash_equivalents,asset_accounts_receivable,asset_inventory,asset_trading_financial_assets,asset_construction_in_progress,asset_total_assets,asset_total_assets_yoy_growth,liability_accounts_payable,liability_advance_from_customers,liability_total_liabilities,liability_total_liabilities_yoy_growth,liability_contract_liabilities,liability_short_term_loans,asset_liability_ratio,equity_unappropriated_profit,equity_total_equity,report_period,report_year
+1,000590,启迪药业,23542.1369,2436.956,11822.2842,2510.8639,1520.8736,116675.39,20.55,5042.8621,,46425.9984,20.55,,,40.07,-6096.5667,69846.84,2022FY,2022
+2,000590,启迪药业,18976.9846,2154.8146,13008.6662,2510.8639,2383.4157,115112.0902,-1.38,4758.82,,42291.7897,-8.66,,0.0,36.74,29534.5142,72820.3005,2023FY,2023
+3,000590,启迪药业,20037.1041,1579.2136,12609.579,,,112419.9452,-3.65,4223.4389,0.0,42014.8491,,5904.2502,,59.84,,70485.0961,2023HY,2023
+4,000590,启迪药业,,,,,,111744.392278,-4.23,,,,,,,,,70888.762171,2023Q3,2023
+5,000590,启迪药业,,,,,,101341.7469,-11.96,,,41218.4517,-17.0,,,40.67,,59824.6119,2024FY,2024
+6,000590,启迪药业,,,,,,112855.6299,-1.96,,,42327.9732,0.08,,,375.26,,70527.6568,2024HY,2024
+7,000590,启迪药业,,,,,,116347.9014,1.07,,,44319.2498,5.36,,,38.09,,72028.6516,2024Q1,2024
+8,000590,启迪药业,21654.2305,380.7887,12863.9922,,1839.3093,100920.238,-0.42,3520.9315,5020.2962,42523.2969,3.17,,3000.0,42.12,,58396.9411,2025HY,2025

@@ -1,0 +1,9 @@
+﻿serial_number,stock_code,stock_abbr,asset_cash_and_cash_equivalents,asset_accounts_receivable,asset_inventory,asset_trading_financial_assets,asset_construction_in_progress,asset_total_assets,asset_total_assets_yoy_growth,liability_accounts_payable,liability_advance_from_customers,liability_total_liabilities,liability_total_liabilities_yoy_growth,liability_contract_liabilities,liability_short_term_loans,asset_liability_ratio,equity_unappropriated_profit,equity_total_equity,report_period,report_year
+1,000790,华神科技,14463.7735,41272.9958,10183.3402,,,167705.84,23.67,,,67156.1353,,,,40.04,,100307.77,2022FY,2022
+2,000790,华神科技,21117.99,47974.99,10833.1,,14792.9323,213347.89,27.22,,,117592.88,8.65,,,55.13,,103319.47,2023FY,2023
+3,000790,华神科技,,,,,,196966.35,17.45,,,,,,,86.84,217107001.93,105795.03,2023HY,2023
+4,000790,华神科技,,18883.6637,,,24966.7998,224923.8968,5.43,,,1181257849.14,1004431.78,,,52.5,,102589.5579,2024FY,2024
+5,000790,华神科技,14715.014105,46255.70317,11463.919341,,,218338.531682,2.34,18050.2308,,134514.845322,,,,61.61,,105171.896417,2024HY,2024
+6,000790,华神科技,18925.5506,32879.3832,9745.2661,,,208707.473306,-7.21,16689.2463,,106950.2863,-20.49,,,51.24,,97517.727178,2025HY,2025
+7,000790,华神科技,16829.83,36156.54,11304.09,,,213099.68,-5.26,,,107740.4,-13.85,,,50.56,,101141.6,2025Q1,2025
+8,000790,华神科技,,,,,,186170.492685,-17.23,,,,,,,,,94982.455508,2025Q3,2025

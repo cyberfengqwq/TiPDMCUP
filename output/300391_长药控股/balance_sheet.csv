@@ -1,0 +1,7 @@
+﻿serial_number,stock_code,stock_abbr,asset_cash_and_cash_equivalents,asset_accounts_receivable,asset_inventory,asset_trading_financial_assets,asset_construction_in_progress,asset_total_assets,asset_total_assets_yoy_growth,liability_accounts_payable,liability_advance_from_customers,liability_total_liabilities,liability_total_liabilities_yoy_growth,liability_contract_liabilities,liability_short_term_loans,asset_liability_ratio,equity_unappropriated_profit,equity_total_equity,report_period,report_year
+1,300391,长药控股,1747.4791,14289.7053,5947.3798,,17793.5862,357858.79,,53849.5082,,150500.0,,1447.9101,,42.06,-35609.2374,80067.27,2022FY,2022
+2,300391,长药控股,1520.3301,163915.6949,5185.8189,,,344575.71,-3.71,34104.3467,,242843.5632,-15.32,3003.2341,20511.623,70.48,-96174.5689,19512.11,2023FY,2023
+3,300391,长药控股,1279.110881,122205.04417,13677.482568,0.0,0.0,373245.351425,4.3,24984.2636,0.0,204540.2121,109.45,2619.321042,50690.907528,94.05,-38030.7435,77645.766445,2023HY,2023
+4,300391,长药控股,,,,,,366830.9119,2.51,,,203450.152,9.97,,,55.46,,77771.4584,2023Q1,2023
+5,300391,长药控股,829.6536,97991.6975,4245.0997,,,199571.7642,-42.08,22240.6467,,65288.2849,10.45,,,32.71,-96174.5689,-43284.0659,2024FY,2024
+6,300391,长药控股,1006.05,152031.21,5415.22,,18924.82,310780.97,-9.81,1374.0,,233219.3437,14.02,,21972.39,75.04,-111431.8748,4254.8,2024HY,2024

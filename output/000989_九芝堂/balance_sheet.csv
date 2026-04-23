@@ -1,0 +1,7 @@
+﻿serial_number,stock_code,stock_abbr,asset_cash_and_cash_equivalents,asset_accounts_receivable,asset_inventory,asset_trading_financial_assets,asset_construction_in_progress,asset_total_assets,asset_total_assets_yoy_growth,liability_accounts_payable,liability_advance_from_customers,liability_total_liabilities,liability_total_liabilities_yoy_growth,liability_contract_liabilities,liability_short_term_loans,asset_liability_ratio,equity_unappropriated_profit,equity_total_equity,report_period,report_year
+1,000989,九芝堂,108934.5445,32428.8192,74917.1033,,,523841.557739,-0.52,,,398215.586,,,,24.0,148468.7873,398571.55292,2022FY,2022
+2,000989,九芝堂,67271.394,44175.084,96192.3395,23120.2371,,532979.8978,0.87,9376.1926,,138248.2312,-65.28,,,25.94,,395227.24,2023FY,2023
+3,000989,九芝堂,69505.4319,61386.4318,72483.7933,35054.5312,,548841.13,4.77,9920.9898,,159128.2731,,,,37.87,,390143.36,2023HY,2023
+4,000989,九 芝堂,29675.18298,84410.276052,83733.24292,36239.370137,,573001.76239,7.51,4712.097356,,163828.389409,,2863.904564,15602.179093,28.59,124388.594535,409687.406653,2024Q1,2024
+5,000989,九芝堂,29713.49,57500.78,83226.81,,,502599.396,-3.56,3904.7795,,114425.95,-1.35,,,22.74,97687.3697,364310.144,2025HY,2025
+6,000989,九芝堂,,,,,,499790.6548,-4.1,,,,,,,,,385992.7288,2025Q3,2025
