@@ -53,7 +53,7 @@ class AgentManager:
             _modelpath=_ANALYSIS_MODEL_PATH,
             _temperature=0.7,
             _top_p=0.8,
-            _max_tokens=512,
+            _max_tokens=1024,
         )
         logger.info("[AgentManager] 分析模型配置就绪（延迟加载）")
 

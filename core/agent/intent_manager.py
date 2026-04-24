@@ -218,3 +218,77 @@ class IntentGatekeeper:
         )
 
         return slots
+
+
+# ── 轻量规则门卫（不依赖 ML 模型，适用于 batch 模式）────────────────────────────
+
+import re as _re
+
+_YEAR_RE = _re.compile(r"20\d{2}")
+_PERIOD_KEYWORDS = [
+    "年报", "年度报告", "FY",
+    "半年报", "半年度", "HY", "上半年",
+    "一季报", "一季度", "Q1", "第一季度",
+    "三季报", "三季度", "Q3", "第三季度", "前三季度",
+]
+# 相对时间词：有这些词时视为有隐含时间，不拦截
+_RELATIVE_TIME = ["去年", "今年", "最新", "最近", "近几年", "历年", "近三年", "近年来"]
+_COMPANY_RE = _re.compile(r"[一-龥]{2,8}(?:股份|集团|制药|医药|药业|药品|生物|科技|健康)")
+# 不是公司名的常见词，排除误匹配
+_NON_COMPANY = {"销售费用", "研发费用", "管理费用", "财务费用", "营业收入", "净利润", "利润总额",
+                "营业利润", "总资产", "总负债", "资产负债", "现金流", "毛利率", "净利率"}
+
+
+class LiteGatekeeper:
+    """
+    基于正则规则的轻量意图门卫，无需加载 ML 模型。
+
+    拦截策略（比 ML 门卫宽松）：
+    - 只要有年份（如 2024）或报告期关键词 → 放行，让 SQL 模型处理报告期选择
+    - 有相对时间（去年/今年/最新）→ 放行
+    - 什么时间信息都没有 → 拦截，追问年份和报告期
+    """
+
+    def analyze(self, user_input: str, history: str = "") -> QuerySlots:
+        combined = (history + " " + user_input).strip()
+
+        # 提取年份（优先从当前输入，兜底从历史）
+        year_m = _YEAR_RE.search(user_input) or _YEAR_RE.search(history)
+        year = year_m.group(0) if year_m else None
+
+        # 检测报告期关键词
+        period = None
+        for kw in _PERIOD_KEYWORDS:
+            if kw in combined:
+                period = kw
+                break
+
+        # 相对时间词
+        has_relative = any(w in combined for w in _RELATIVE_TIME)
+
+        # 提取公司名（仅从当前输入，用于生成追问话术）
+        company = None
+        for m in _COMPANY_RE.finditer(user_input):
+            candidate = m.group(0)
+            if candidate not in _NON_COMPANY and len(candidate) >= 2:
+                company = candidate
+                break
+
+        # 只要有任何时间线索就放行
+        complete = bool(year or period or has_relative)
+
+        if complete:
+            return QuerySlots(year=year, period=period, company=company, is_complete=True)
+
+        # 生成追问话术
+        company_str = company or "该公司"
+        reason = (
+            f"请问您想查询{company_str}哪个年份和报告期的数据？"
+            "例如：2024年年报、2025年三季报。"
+        )
+
+        logger.info(f"[LiteGatekeeper] 意图不完整: year={year}, period={period}")
+        return QuerySlots(
+            year=year, period=period, company=company,
+            is_complete=False, missing_reason=reason,
+        )

@@ -1,6 +1,7 @@
 # core/rag/sql_retriever.py
 
 import logging
+import os
 import threading
 
 # from FlagEmbedding import BGEM3FlagModel
@@ -34,10 +35,11 @@ class Retrieval:
     ) -> None:
         # 初始化模型与参数
         self.model_name = model_name
+        embedding_device = os.environ.get("EMBEDDING_DEVICE", "cpu")
         self.embedding = HuggingFaceEmbeddings(
             model_name=model_name,
             model_kwargs={
-                "device": "cpu",
+                "device": embedding_device,
                 "local_files_only": True,  # 强制只读本地，不联网
                 "revision": "main",  # 锁定主分支，防止它去扫描 PR 分支
             },
@@ -155,6 +157,13 @@ class Retrieval:
     def load_or_init_index(self):
         """加载已存在的索引或初始化新索引"""
         if self.index_path is None or self.meta_path is None:
+            return
+
+        force_rebuild = os.environ.get("FORCE_REBUILD_RAG_INDEX", "0") == "1"
+        if force_rebuild:
+            logging.info("检测到 FORCE_REBUILD_RAG_INDEX=1，跳过索引加载并强制重建")
+            self.index = None
+            self.meta = []
             return
 
         if self.index_path.exists() and self.meta_path.exists():

@@ -12,21 +12,24 @@
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
+
+import openpyxl
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-import openpyxl
-
 from core.agent.pipeline import Agent
-from core.services.vllm_service import LLM
+from core.services.vllm_service import TransformersLLM
 
-ANALYSIS_MODEL = "/home/qwq/models/Qwen2.5-7B-Instruct"
-SQL_MODEL = "/home/qwq/models/qwen2_5_7b_sql"
+ANALYSIS_MODEL = "/home/qwq/TiPDMCUP/models/Qwen2.5-7B-Coder-Instruct"
+SQL_MODEL = "/home/qwq/TiPDMCUP/models/Qwen2.5-7B-N2SQL"
 
 BATCH_USER_ID = "batch_export"
 BATCH_COMPANY_ID = "batch"
+# 每次运行用唯一时间戳，避免跨次运行的 chat 历史污染
+_RUN_TS = int(time.time())
 
 CHART_TYPE_ZH = {
     "line": "折线图",
@@ -37,28 +40,21 @@ CHART_TYPE_ZH = {
 }
 
 
-def load_llms() -> tuple[LLM, LLM]:
-    print("正在加载 SQL 模型...")
-    sql_llm = LLM(
+def load_llms() -> tuple[TransformersLLM, TransformersLLM]:
+    # 只创建对象，不预加载——pipeline 每次调用时按需加载/卸载，避免两模型同时占 GPU
+    sql_llm = TransformersLLM(
         _modelpath=SQL_MODEL,
         _temperature=0.2,
         _top_p=0.9,
         _max_tokens=512,
-        _gpu_memory_utilization=0.3,
     )
-    sql_llm.load_model()
-
-    print("正在加载分析模型...")
-    analysis_llm = LLM(
+    analysis_llm = TransformersLLM(
         _modelpath=ANALYSIS_MODEL,
         _temperature=0.7,
         _top_p=0.8,
-        _max_tokens=512,
-        _gpu_memory_utilization=0.5,
+        _max_tokens=1024,
     )
-    analysis_llm.load_model()
-
-    print("模型加载完成\n")
+    print("LLM 对象已创建（模型将在首次调用时按需加载）\n")
     return sql_llm, analysis_llm
 
 
@@ -84,26 +80,35 @@ def read_questions(xlsx_path: Path) -> list[dict]:
 
 
 def run_problem(
-    sql_llm: LLM,
-    analysis_llm: LLM,
+    sql_llm: TransformersLLM,
+    analysis_llm: TransformersLLM,
     problem_id: str,
     questions: list[str],
     task: int,
+    question_type: str,
+    questions_raw: str,
+    detailed_results: list[dict] | None,
+    output_json_path: Path | None,
 ) -> dict:
     """为一道题新建 Agent，顺序跑完所有对话轮次，返回汇总结果。"""
+    # task=2：用轻量规则门卫（无需 ML 模型），保留多轮追问过程
+    # task=3：模糊/多意图查询直接进分解，跳过门卫
     agent = Agent(
         user_id=BATCH_USER_ID,
         company_id=BATCH_COMPANY_ID,
-        chat_id=f"batch_{problem_id}",
+        chat_id=f"batch_{problem_id}_{_RUN_TS}",
         sql_llm=sql_llm,
         analysis_llm=analysis_llm,
+        skip_gatekeeper=(task == 3),
+        use_lite_gatekeeper=(task == 2),
     )
 
     qa_pairs: list[dict] = []
     sqls: list[str] = []
     chart_types: list[str] = []
+    rounds: list[dict] = []
 
-    for q in questions:
+    for idx, q in enumerate(questions, start=1):
         result = agent.run(q, problem_id=problem_id, task=task)
         a = result.get("A", {})
 
@@ -119,9 +124,36 @@ def run_problem(
             chart_types.append(ct)
 
         entry: dict = {"Q": q, "A": {"content": content, "image": image}}
-        if task == 3 and references:
+        if references:
             entry["A"]["references"] = references
         qa_pairs.append(entry)
+
+        rounds.append({
+            "round": idx,
+            "question": q,
+            "intent_info": a.get("intent_info", {}),
+            "rag_context": a.get("rag_context", {}),
+            "sql": sql,
+            "sql_corrected": a.get("sql_corrected", False),
+            "sql_result": a.get("sql_result", []),
+            "analysis": content,
+            "image": image,
+        })
+
+    # 每道题一条记录，所有轮次嵌套在 rounds 里
+    problem_record = {
+        "problem_id": problem_id,
+        "task": task,
+        "question_type": question_type,
+        "questions_raw": questions_raw,
+        "qa_pairs": qa_pairs,
+        "sqls": sqls,
+        "rounds": rounds,
+    }
+    if detailed_results is not None:
+        detailed_results.append(problem_record)
+        if output_json_path is not None:
+            write_batch_json(detailed_results, output_json_path)
 
     return {
         "qa_pairs": qa_pairs,
@@ -144,11 +176,26 @@ def _set_col_widths(ws, widths: dict[str, int]) -> None:
             cell.alignment = openpyxl.styles.Alignment(wrap_text=True, vertical="top")
 
 
+def write_batch_json(records: list[dict], output_path: Path) -> None:
+    def _default(o):
+        if o.__class__.__name__ == "Decimal":
+            return float(o)
+        raise TypeError(
+            f"Object of type {o.__class__.__name__} is not JSON serializable"
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False, indent=2, default=_default)
+
+
 def export_task2(
     questions_xlsx: Path,
     output_path: Path,
-    sql_llm: LLM,
-    analysis_llm: LLM,
+    sql_llm: TransformersLLM,
+    analysis_llm: TransformersLLM,
+    detailed_results: list[dict],
+    output_json_path: Path,
 ) -> None:
     rows = read_questions(questions_xlsx)
 
@@ -163,13 +210,38 @@ def export_task2(
 
         try:
             q_list = json.loads(questions_raw)
-            questions = [item["Q"] for item in q_list]
+            if not isinstance(q_list, list):
+                raise ValueError("questions_raw is not a list")
+            questions = [
+                item.get("Q") if isinstance(item, dict) else str(item)
+                for item in q_list
+            ]
         except Exception as e:
             print(f"[{problem_id}] 解析问题失败: {e}")
+            detailed_results.append({
+                "problem_id": problem_id,
+                "task": 2,
+                "question_type": row["question_type"],
+                "questions_raw": questions_raw,
+                "qa_pairs": [],
+                "sqls": [],
+                "rounds": [{"round": 0, "question": "", "error": str(e)}],
+            })
+            write_batch_json(detailed_results, output_json_path)
             continue
 
         print(f"[{problem_id}] 开始处理 ({len(questions)} 轮)...")
-        result = run_problem(sql_llm, analysis_llm, problem_id, questions, task=2)
+        result = run_problem(
+            sql_llm,
+            analysis_llm,
+            problem_id,
+            questions,
+            task=2,
+            question_type=row["question_type"],
+            questions_raw=questions_raw,
+            detailed_results=detailed_results,
+            output_json_path=output_json_path,
+        )
 
         sql_str = "\n---\n".join(result["sqls"]) if result["sqls"] else "无"
         chart_str = (
@@ -190,8 +262,10 @@ def export_task2(
 def export_task3(
     questions_xlsx: Path,
     output_path: Path,
-    sql_llm: LLM,
-    analysis_llm: LLM,
+    sql_llm: TransformersLLM,
+    analysis_llm: TransformersLLM,
+    detailed_results: list[dict],
+    output_json_path: Path,
 ) -> None:
     rows = read_questions(questions_xlsx)
 
@@ -206,13 +280,38 @@ def export_task3(
 
         try:
             q_list = json.loads(questions_raw)
-            questions = [item["Q"] for item in q_list]
+            if not isinstance(q_list, list):
+                raise ValueError("questions_raw is not a list")
+            questions = [
+                item.get("Q") if isinstance(item, dict) else str(item)
+                for item in q_list
+            ]
         except Exception as e:
             print(f"[{problem_id}] 解析问题失败: {e}")
+            detailed_results.append({
+                "problem_id": problem_id,
+                "task": 3,
+                "question_type": row["question_type"],
+                "questions_raw": questions_raw,
+                "qa_pairs": [],
+                "sqls": [],
+                "rounds": [{"round": 0, "question": "", "error": str(e)}],
+            })
+            write_batch_json(detailed_results, output_json_path)
             continue
 
         print(f"[{problem_id}] 开始处理 ({len(questions)} 轮)...")
-        result = run_problem(sql_llm, analysis_llm, problem_id, questions, task=3)
+        result = run_problem(
+            sql_llm,
+            analysis_llm,
+            problem_id,
+            questions,
+            task=3,
+            question_type=row["question_type"],
+            questions_raw=questions_raw,
+            detailed_results=detailed_results,
+            output_json_path=output_json_path,
+        )
 
         sql_str = "\n---\n".join(result["sqls"]) if result["sqls"] else "无"
         answer_json = json.dumps(result["qa_pairs"], ensure_ascii=False, indent=None)
@@ -245,6 +344,9 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     sql_llm, analysis_llm = load_llms()
+    detailed_results: list[dict] = []
+    output_json_path = output_dir / "batch_results.json"
+    write_batch_json(detailed_results, output_json_path)
 
     if args.task in ("2", "all"):
         export_task2(
@@ -252,6 +354,8 @@ def main() -> None:
             output_path=output_dir / "result_2.xlsx",
             sql_llm=sql_llm,
             analysis_llm=analysis_llm,
+            detailed_results=detailed_results,
+            output_json_path=output_json_path,
         )
 
     if args.task in ("3", "all"):
@@ -260,7 +364,12 @@ def main() -> None:
             output_path=output_dir / "result_3.xlsx",
             sql_llm=sql_llm,
             analysis_llm=analysis_llm,
+            detailed_results=detailed_results,
+            output_json_path=output_json_path,
         )
+
+    if detailed_results:
+        write_batch_json(detailed_results, output_dir / "batch_results.json")
 
 
 if __name__ == "__main__":

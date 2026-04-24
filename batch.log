@@ -1,0 +1,88 @@
+nohup: ignoring input
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: BAAI/bge-m3
+INFO:root:索引已从 /home/qwq/TiPDMCUP/data/users/batch_export/user_index.faiss 加载
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: BAAI/bge-m3
+INFO:root:索引已从 /home/qwq/TiPDMCUP/data/faiss_global/field_index.faiss 加载
+INFO:core.rag.sql_retriever:[UserMeta] write path = /home/qwq/TiPDMCUP/data/users/batch_export/user_meta.json
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: BAAI/bge-m3
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: BAAI/bge-m3
+INFO:root:索引已从 /home/qwq/TiPDMCUP/data/faiss_report_store/report_index.faiss 加载
+INFO:core.rag.report_retriever:研报文件无变化（共473篇），跳过索引重建
+INFO:core.rag.provenance_store:[ProvenanceStore] 加载完成，6730 条事实，1481 个索引键，4 家公司
+INFO:core.rag.provenance_store:[ProvenanceStore] PDF 索引构建完成，扫描 4 个目录，找到 1288 个 PDF 文件
+Traceback (most recent call last):
+  File "/home/qwq/TiPDMCUP/scripts/batch_export.py", line 378, in <module>
+    main()
+  File "/home/qwq/TiPDMCUP/scripts/batch_export.py", line 354, in main
+    export_task2(
+  File "/home/qwq/TiPDMCUP/scripts/batch_export.py", line 230, in export_task2
+    result = run_problem(
+             ^^^^^^^^^^^^
+  File "/home/qwq/TiPDMCUP/scripts/batch_export.py", line 93, in run_problem
+    agent = Agent(
+            ^^^^^^
+  File "/home/qwq/TiPDMCUP/core/agent/pipeline.py", line 100, in __init__
+    self.gatekeeper = None if skip_gatekeeper else _get_gatekeeper()
+                                                   ^^^^^^^^^^^^^^^^^
+  File "/home/qwq/TiPDMCUP/core/agent/pipeline.py", line 59, in _get_gatekeeper
+    _gatekeeper = IntentGatekeeper()
+                  ^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/TiPDMCUP/core/agent/intent_manager.py", line 97, in __init__
+    self.llm.load_model()
+  File "/home/qwq/TiPDMCUP/core/services/vllm_service.py", line 59, in load_model
+    self.llm = vllm.LLM(**vllm_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/entrypoints/llm.py", line 382, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/v1/engine/llm_engine.py", line 177, in from_engine_args
+    return cls(
+           ^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/v1/engine/llm_engine.py", line 92, in __init__
+    self.renderer = renderer = renderer_from_config(self.vllm_config)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/renderers/registry.py", line 83, in renderer_from_config
+    tokenizer = cached_tokenizer_from_config(model_config, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/tokenizers/registry.py", line 227, in cached_tokenizer_from_config
+    return cached_get_tokenizer(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/tokenizers/registry.py", line 210, in get_tokenizer
+    tokenizer = tokenizer_cls_.from_pretrained(tokenizer_name, *args, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/vllm/tokenizers/hf.py", line 85, in from_pretrained
+    tokenizer = AutoTokenizer.from_pretrained(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/models/auto/tokenization_auto.py", line 1156, in from_pretrained
+    return tokenizer_class.from_pretrained(pretrained_model_name_or_path, *inputs, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/tokenization_utils_base.py", line 2113, in from_pretrained
+    return cls._from_pretrained(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/tokenization_utils_base.py", line 2359, in _from_pretrained
+    tokenizer = cls(*init_inputs, **init_kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/models/qwen2/tokenization_qwen2_fast.py", line 120, in __init__
+    super().__init__(
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/tokenization_utils_fast.py", line 178, in __init__
+    super().__init__(**kwargs)
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/tokenization_utils_base.py", line 1472, in __init__
+    self._set_model_specific_special_tokens(special_tokens=self.extra_special_tokens)
+  File "/home/qwq/anaconda3/envs/ticup/lib/python3.11/site-packages/transformers/tokenization_utils_base.py", line 1210, in _set_model_specific_special_tokens
+    self.SPECIAL_TOKENS_ATTRIBUTES = self.SPECIAL_TOKENS_ATTRIBUTES + list(special_tokens.keys())
+                                                                           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'keys'
+ERROR conda.cli.main_run:execute(142): `conda run python scripts/batch_export.py all --data-dir /home/qwq/正式数据` failed. (See above for error)
+LLM 对象已创建（模型将在首次调用时按需加载）
+
+[B1001] 开始处理 (2 轮)...
+正在加载模型：/home/qwq/TiPDMCUP/models/Qwen3-VL-2B-Intent
+INFO 04-24 09:58:11 [utils.py:233] non-default args: {'trust_remote_code': True, 'download_dir': '/home/qwq/TiPDMCUP/core/models', 'load_format': 'bitsandbytes', 'max_model_len': 4096, 'gpu_memory_utilization': 0.15, 'disable_log_stats': True, 'quantization': 'bitsandbytes', 'enforce_eager': True, 'limit_mm_per_prompt': {'image': 0, 'video': 0}, 'model': '/home/qwq/TiPDMCUP/models/Qwen3-VL-2B-Intent'}
+INFO 04-24 09:58:11 [model.py:549] Resolved architecture: Qwen3VLForConditionalGeneration
+INFO 04-24 09:58:11 [model.py:1678] Using max model len 4096
+INFO 04-24 09:58:11 [scheduler.py:238] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 04-24 09:58:12 [vllm.py:790] Asynchronous scheduling is enabled.
+WARNING 04-24 09:58:12 [vllm.py:848] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 04-24 09:58:12 [vllm.py:859] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 04-24 09:58:12 [vllm.py:1025] Cudagraph is disabled under eager mode
+INFO 04-24 09:58:12 [compilation.py:290] Enabled custom fusions: norm_quant, act_quant
