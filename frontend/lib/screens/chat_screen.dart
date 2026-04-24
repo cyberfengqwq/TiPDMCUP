@@ -374,7 +374,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "向智能助手提问，例如：贵州茅台去年的净利润是多少？",
                   hintStyle:
                       TextStyle(color: Colors.grey.shade400, fontSize: 14),

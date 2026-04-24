@@ -1,10 +1,55 @@
 # core/services/vllm_service.py
 
+import json
+import logging
 from pathlib import Path
+from typing import Any
 
 import torch
 import vllm
 from transformers import AutoTokenizer
+
+
+logger = logging.getLogger(__name__)
+
+
+def _sanitize_tokenizer_config(model_path: str) -> None:
+    config_path = Path(model_path) / "tokenizer_config.json"
+    if not config_path.exists():
+        return
+
+    try:
+        data: dict[str, Any] = json.loads(config_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning("[LLM] 读取 tokenizer_config 失败：%s", e)
+        return
+
+    value = data.get("extra_special_tokens")
+    if not isinstance(value, list):
+        return
+
+    converted: dict[str, str] = {}
+    for idx, item in enumerate(value):
+        if isinstance(item, str):
+            converted[f"extra_special_token_{idx}"] = item
+        elif isinstance(item, dict):
+            token = item.get("content") or item.get("token") or item.get("text")
+            name = item.get("name") or f"extra_special_token_{idx}"
+            if isinstance(token, str):
+                converted[str(name)] = token
+
+    data["extra_special_tokens"] = converted
+    try:
+        config_path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        logger.warning(
+            "[LLM] 检测到旧版 extra_special_tokens(list)，已自动转换为 dict：%s",
+            str(config_path),
+        )
+    except Exception as e:
+        logger.warning("[LLM] 写回 tokenizer_config 失败：%s", e)
 
 
 class LLM:
@@ -46,6 +91,7 @@ class LLM:
         if self.llm is None:
             model_path = str(Path(self.model_path).expanduser().resolve())
             print(f"正在加载模型：{model_path}")
+            _sanitize_tokenizer_config(model_path)
 
             # 使用 vLLM 加载模型
             self.llm = vllm.LLM(
@@ -59,7 +105,10 @@ class LLM:
             )
 
             # 加载分词器
-            self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                model_path,
+                trust_remote_code=True,
+            )
 
             # 模型参数设置：选词方式
             self.sampling_params = vllm.SamplingParams(
