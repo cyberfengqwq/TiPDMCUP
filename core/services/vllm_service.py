@@ -1,8 +1,10 @@
 # core/services/vllm_service.py
 
 import gc
+import hashlib
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -14,26 +16,25 @@ from transformers import AutoTokenizer
 logger = logging.getLogger(__name__)
 
 
-def _sanitize_tokenizer_config(model_path: str) -> None:
+def _sanitize_tokenizer_config(config_path: Path) -> bool:
     """
     兼容部分模型 `tokenizer_config.json` 中 `extra_special_tokens` 的旧格式。
 
     新版 transformers 在部分 tokenizer 初始化时会假设该字段为 dict，
     若为 list 会触发：'list' object has no attribute 'keys'。
     """
-    config_path = Path(model_path) / "tokenizer_config.json"
     if not config_path.exists():
-        return
+        return False
 
     try:
         data: dict[str, Any] = json.loads(config_path.read_text(encoding="utf-8"))
     except Exception as e:
         logger.warning("[LLM] 读取 tokenizer_config 失败：%s", e)
-        return
+        return False
 
     value = data.get("extra_special_tokens")
     if not isinstance(value, list):
-        return
+        return False
 
     converted: dict[str, str] = {}
     for idx, item in enumerate(value):
@@ -54,12 +55,69 @@ def _sanitize_tokenizer_config(model_path: str) -> None:
             json.dumps(data, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
-        logger.warning(
-            "[LLM] 检测到旧版 extra_special_tokens(list)，已自动转换为 dict：%s",
-            str(config_path),
-        )
+        logger.warning("[LLM] 已修复 extra_special_tokens(list) -> dict：%s", str(config_path))
+        return True
     except Exception as e:
         logger.warning("[LLM] 写回 tokenizer_config 失败：%s", e)
+        return False
+
+
+def _prepare_tokenizer_path(model_path: str) -> str:
+    """
+    为只读模型目录准备可写 tokenizer 副本。
+    如果检测到 `extra_special_tokens` 为 list，会在缓存目录生成修复副本并返回其路径。
+    否则返回原路径。
+    """
+    model_dir = Path(model_path)
+    config_path = model_dir / "tokenizer_config.json"
+    if not config_path.exists():
+        return model_path
+
+    try:
+        data: dict[str, Any] = json.loads(config_path.read_text(encoding="utf-8"))
+    except Exception:
+        return model_path
+
+    if not isinstance(data.get("extra_special_tokens"), list):
+        return model_path
+
+    cache_root = Path.home() / ".cache" / "tipdmcup_tokenizers"
+    cache_key = hashlib.sha1(model_path.encode("utf-8")).hexdigest()[:12]
+    patched_dir = cache_root / f"{model_dir.name}_{cache_key}"
+    patched_dir.mkdir(parents=True, exist_ok=True)
+
+    # 仅复制 tokenizer 相关文件，避免复制大模型权重
+    skip_suffixes = {
+        ".safetensors",
+        ".bin",
+        ".pt",
+        ".onnx",
+        ".gguf",
+    }
+    skip_names = {
+        "pytorch_model.bin",
+        "model.safetensors",
+    }
+    for src in model_dir.iterdir():
+        if src.is_dir():
+            continue
+        if src.name in skip_names or src.suffix in skip_suffixes:
+            continue
+        dst = patched_dir / src.name
+        if not dst.exists():
+            try:
+                shutil.copy2(src, dst)
+            except Exception as e:
+                logger.warning("[LLM] 复制 tokenizer 相关文件失败 %s: %s", src.name, e)
+
+    patched_config = patched_dir / "tokenizer_config.json"
+    if not patched_config.exists():
+        # 回退：至少确保配置文件可用
+        shutil.copy2(config_path, patched_config)
+
+    if _sanitize_tokenizer_config(patched_config):
+        logger.warning("[LLM] 模型目录只读，已使用 tokenizer 补丁副本：%s", str(patched_dir))
+    return str(patched_dir)
 
 
 class LLM:
@@ -96,7 +154,7 @@ class LLM:
         if self.llm is None:
             model_path = str(Path(self.model_path).expanduser().resolve())
             print(f"正在加载模型：{model_path}")
-            _sanitize_tokenizer_config(model_path)
+            tokenizer_path = _prepare_tokenizer_path(model_path)
 
             vllm_kwargs: dict = {
                 "model": model_path,
@@ -106,6 +164,7 @@ class LLM:
                 "quantization": "bitsandbytes",
                 "load_format": "bitsandbytes",
                 "max_model_len": self.max_model_len,
+                "tokenizer": tokenizer_path,
             }
             if self.limit_mm_per_prompt is not None:
                 vllm_kwargs["limit_mm_per_prompt"] = self.limit_mm_per_prompt
@@ -114,7 +173,7 @@ class LLM:
             self.llm = vllm.LLM(**vllm_kwargs)
 
             self.tokenizer = AutoTokenizer.from_pretrained(
-                model_path,
+                tokenizer_path,
                 trust_remote_code=True,
             )
             self.sampling_params = vllm.SamplingParams(
@@ -206,7 +265,7 @@ class TransformersLLM:
 
         model_path = str(Path(self.model_path).expanduser().resolve())
         print(f"正在加载模型：{model_path}")
-        _sanitize_tokenizer_config(model_path)
+        tokenizer_path = _prepare_tokenizer_path(model_path)
 
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
@@ -215,7 +274,7 @@ class TransformersLLM:
             bnb_4bit_quant_type="nf4",
         )
         self.tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True
+            tokenizer_path, trust_remote_code=True
         )
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path,
