@@ -1,0 +1,592 @@
+[
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度营业总收入排名前十的中药公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, total_operating_revenue FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC LIMIT 10;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度净利润排名前五的公司及金额",
+    "output": "SELECT stock_abbr, stock_code, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY net_profit_10k_yuan DESC LIMIT 5;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度净利润为负数的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_10k_yuan < 0 ORDER BY net_profit_10k_yuan;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025前三季度收入超过200亿元的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, total_operating_revenue FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND total_operating_revenue > 2000000 ORDER BY total_operating_revenue DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度所有中药公司的股票代码、简称和营业总收入，按营业总收入从高到低排序",
+    "output": "SELECT stock_code, stock_abbr, total_operating_revenue FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度资产负债率超过60%的公司有哪些，列出股票代码、简称、资产负债率",
+    "output": "SELECT b.stock_code, b.stock_abbr, b.asset_liability_ratio FROM balance_sheet b WHERE b.report_period = '2025Q3' AND b.asset_liability_ratio > 60 ORDER BY b.asset_liability_ratio DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度资产负债率行业均值是多少",
+    "output": "SELECT ROUND(AVG(asset_liability_ratio), 2) AS avg_asset_liability_ratio FROM balance_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度销售毛利率和销售净利率均高于行业均值的公司有哪些",
+    "output": "SELECT stock_abbr, gross_profit_margin, net_profit_margin FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND gross_profit_margin > (SELECT AVG(gross_profit_margin) FROM core_performance_indicators_sheet WHERE report_period = '2025Q3') AND net_profit_margin > (SELECT AVG(net_profit_margin) FROM core_performance_indicators_sheet WHERE report_period = '2025Q3') ORDER BY gross_profit_margin DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度经营性现金流量净额为负的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, operating_cf_net_amount FROM cash_flow_sheet WHERE report_period = '2025Q3' AND operating_cf_net_amount < 0 ORDER BY operating_cf_net_amount;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度经营性现金流量净额为负且净利润为正的公司有哪些",
+    "output": "SELECT c.stock_abbr, c.stock_code, cf.operating_cf_net_amount, c.net_profit_10k_yuan FROM core_performance_indicators_sheet c JOIN cash_flow_sheet cf ON c.stock_abbr = cf.stock_abbr AND c.report_period = cf.report_period WHERE c.report_period = '2025Q3' AND cf.operating_cf_net_amount < 0 AND c.net_profit_10k_yuan > 0 ORDER BY cf.operating_cf_net_amount;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度净利润同比增长率超过50%的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_yoy_growth > 50 ORDER BY net_profit_yoy_growth DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度研发费用占营业总收入比例前五的公司",
+    "output": "SELECT stock_abbr, ROUND(operating_expense_rnd_expenses / total_operating_revenue * 100, 2) AS rnd_ratio, operating_expense_rnd_expenses, total_operating_revenue FROM income_sheet WHERE report_period = '2025Q3' ORDER BY rnd_ratio DESC LIMIT 5;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度66家中药公司的资产负债率行业均值，同时列出资产负债率最高的前十家公司",
+    "output": "SELECT stock_abbr, stock_code, ROUND(asset_liability_ratio, 2) AS asset_liability_ratio FROM balance_sheet WHERE report_period = '2025Q3' ORDER BY asset_liability_ratio DESC LIMIT 10;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度短期借款超过货币资金的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, liability_short_term_loans, asset_cash_and_cash_equivalents FROM balance_sheet WHERE report_period = '2025Q3' AND liability_short_term_loans > asset_cash_and_cash_equivalents ORDER BY (liability_short_term_loans - asset_cash_and_cash_equivalents) DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度投资性现金流量净额为正的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, investing_cf_net_amount FROM cash_flow_sheet WHERE report_period = '2025Q3' AND investing_cf_net_amount > 0 ORDER BY investing_cf_net_amount DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "统计2025年第三季度净利润为负数的公司数量",
+    "output": "SELECT COUNT(*) AS loss_company_count FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_10k_yuan < 0;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度营业总收入和净利润均排名前五的公司有哪些",
+    "output": "SELECT c.stock_abbr, c.stock_code, c.total_operating_revenue, c.net_profit_10k_yuan FROM core_performance_indicators_sheet c WHERE c.report_period = '2025Q3' AND c.stock_abbr IN (SELECT stock_abbr FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC LIMIT 5) AND c.stock_abbr IN (SELECT stock_abbr FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY net_profit_10k_yuan DESC LIMIT 5);"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度净利润同比增长率波动最大的3家公司",
+    "output": "SELECT stock_abbr, stock_code, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY ABS(net_profit_yoy_growth) DESC LIMIT 3;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度应收账款占营业总收入比例超过30%的公司",
+    "output": "SELECT b.stock_abbr, b.stock_code, ROUND(b.asset_accounts_receivable / i.total_operating_revenue * 100, 2) AS ar_ratio FROM balance_sheet b JOIN income_sheet i ON b.stock_abbr = i.stock_abbr AND b.report_period = i.report_period WHERE b.report_period = '2025Q3' AND b.asset_accounts_receivable / i.total_operating_revenue > 0.3 ORDER BY ar_ratio DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度存货金额排名前三的公司",
+    "output": "SELECT stock_abbr, stock_code, asset_inventory FROM balance_sheet WHERE report_period = '2025Q3' ORDER BY asset_inventory DESC LIMIT 3;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度加权平均净资产收益率（扣非）超过10%的公司",
+    "output": "SELECT stock_abbr, stock_code, roe_weighted_excl_non_recurring FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND roe_weighted_excl_non_recurring > 10 ORDER BY roe_weighted_excl_non_recurring DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "统计2025年第三季度各公司净利润同比增长率，找出同比增长率超过20%的公司",
+    "output": "SELECT stock_abbr, stock_code, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_yoy_growth > 20 ORDER BY net_profit_yoy_growth DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度扣非净利润与净利润差值绝对值最大的5家公司",
+    "output": "SELECT stock_abbr, net_profit_10k_yuan, net_profit_excl_non_recurring, ABS(net_profit_10k_yuan - net_profit_excl_non_recurring) AS diff FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY diff DESC LIMIT 5;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "按2025年第三季度的销售净利率分组，统计净利率在0-5%、5-10%、10%以上三个区间的公司数量",
+    "output": "SELECT CASE WHEN net_profit_margin < 5 THEN '0-5%' WHEN net_profit_margin < 10 THEN '5-10%' ELSE '10%以上' END AS margin_group, COUNT(*) AS company_count FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' GROUP BY margin_group ORDER BY margin_group;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度满足营业总收入超过100000万元、资产负债率低于40%、经营性现金流为正的公司",
+    "output": "SELECT c.stock_abbr, c.stock_code, c.total_operating_revenue, b.asset_liability_ratio, cf.operating_cf_net_amount FROM core_performance_indicators_sheet c JOIN balance_sheet b ON c.stock_abbr = b.stock_abbr AND c.report_period = b.report_period JOIN cash_flow_sheet cf ON c.stock_abbr = cf.stock_abbr AND c.report_period = cf.report_period WHERE c.report_period = '2025Q3' AND c.total_operating_revenue > 100000 AND b.asset_liability_ratio < 40 AND cf.operating_cf_net_amount > 0 ORDER BY c.total_operating_revenue DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度销售费用占营业总收入比例低于行业均值的公司中净利润最高的3家",
+    "output": "SELECT i.stock_abbr, i.operating_expense_selling_expenses / i.total_operating_revenue * 100 AS sell_ratio, c.net_profit_10k_yuan FROM income_sheet i JOIN core_performance_indicators_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.report_period = '2025Q3' AND i.operating_expense_selling_expenses / i.total_operating_revenue < (SELECT AVG(operating_expense_selling_expenses / total_operating_revenue) FROM income_sheet WHERE report_period = '2025Q3') ORDER BY c.net_profit_10k_yuan DESC LIMIT 3;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度中药公司的平均销售毛利率和销售净利率",
+    "output": "SELECT ROUND(AVG(gross_profit_margin), 2) AS avg_gross_margin, ROUND(AVG(net_profit_margin), 2) AS avg_net_margin FROM core_performance_indicators_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度货币资金占总资产比例超过20%且投资性现金流为负的公司",
+    "output": "SELECT b.stock_abbr, b.stock_code, ROUND(b.asset_cash_and_cash_equivalents / b.asset_total_assets * 100, 2) AS cash_ratio, cf.investing_cf_net_amount FROM balance_sheet b JOIN cash_flow_sheet cf ON b.stock_abbr = cf.stock_abbr AND b.report_period = cf.report_period WHERE b.report_period = '2025Q3' AND b.asset_cash_and_cash_equivalents / b.asset_total_assets > 0.2 AND cf.investing_cf_net_amount < 0 ORDER BY cash_ratio DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度资产总资产同比增长率超过营业总收入同比增长率10个百分点以上的公司",
+    "output": "SELECT b.stock_abbr, b.stock_code, b.asset_total_assets_yoy_growth, c.operating_revenue_yoy_growth FROM balance_sheet b JOIN core_performance_indicators_sheet c ON b.stock_abbr = c.stock_abbr AND b.report_period = c.report_period WHERE b.report_period = '2025Q3' AND b.asset_total_assets_yoy_growth - c.operating_revenue_yoy_growth > 10 ORDER BY (b.asset_total_assets_yoy_growth - c.operating_revenue_yoy_growth) DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "云南白药2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '云南白药' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "云南白药2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '云南白药' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "云南白药2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '云南白药' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "云南白药2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '云南白药' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '片仔癀' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "白云山2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '白云山' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "白云山2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '白云山' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "白云山2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '白云山' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "白云山2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '白云山' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "东阿阿胶2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '东阿阿胶' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "东阿阿胶2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '东阿阿胶' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "东阿阿胶2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '东阿阿胶' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "东阿阿胶2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '东阿阿胶' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "千金药业2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '千金药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "千金药业2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '千金药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "千金药业2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '千金药业' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "千金药业2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '千金药业' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '香雪制药' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '香雪制药' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '香雪制药' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '香雪制药' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "太极集团2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '太极集团' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "太极集团2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '太极集团' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "太极集团2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '太极集团' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "太极集团2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '太极集团' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "以岭药业2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '以岭药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "以岭药业2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '以岭药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "以岭药业2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '以岭药业' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "以岭药业2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '以岭药业' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "康芝药业2025年第三季度的营业总收入是多少",
+    "output": "SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '康芝药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "康芝药业2025年第三季度净利润同比增长情况",
+    "output": "SELECT net_profit_10k_yuan, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '康芝药业' AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "康芝药业2024年年报的利润总额",
+    "output": "SELECT total_profit FROM income_sheet WHERE stock_abbr = '康芝药业' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "康芝药业2022年至2025年三季度的营业总收入趋势",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '康芝药业' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "关联核心业绩指标表和利润表，查询2025年第三季度每家公司的股票代码、简称、营业总收入（取自核心业绩指标表）、销售毛利率（利润表计算：营业收入-营业成本/营业收入*100），保留两位小数",
+    "output": "SELECT c.stock_code, c.stock_abbr, c.total_operating_revenue, ROUND((i.total_operating_revenue - i.operating_expense_cost_of_sales) / i.total_operating_revenue * 100, 2) AS gross_margin FROM core_performance_indicators_sheet c JOIN income_sheet i ON c.stock_abbr = i.stock_abbr AND c.report_period = i.report_period WHERE c.report_period = '2025Q3' ORDER BY gross_margin DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "结合现金流量表和利润表，查询2024年全年所有公司的股票代码、简称、净利润、经营性现金流量净额，筛选经营性现金流量净额大于净利润的公司",
+    "output": "SELECT i.stock_code, i.stock_abbr, i.net_profit, cf.operating_cf_net_amount FROM income_sheet i JOIN cash_flow_sheet cf ON i.stock_abbr = cf.stock_abbr AND i.report_period = cf.report_period WHERE i.report_period = '2024FY' AND cf.operating_cf_net_amount > i.net_profit ORDER BY cf.operating_cf_net_amount DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "关联资产负债表和现金流量表，查询2025年第三季度货币资金占总资产比例超过20%且投资性现金流量净额为负数的公司，按货币资金占比从高到低排序",
+    "output": "SELECT b.stock_abbr, b.stock_code, ROUND(b.asset_cash_and_cash_equivalents / b.asset_total_assets * 100, 2) AS cash_ratio, cf.investing_cf_net_amount FROM balance_sheet b JOIN cash_flow_sheet cf ON b.stock_abbr = cf.stock_abbr AND b.report_period = cf.report_period WHERE b.report_period = '2025Q3' AND b.asset_cash_and_cash_equivalents / b.asset_total_assets > 0.2 AND cf.investing_cf_net_amount < 0 ORDER BY cash_ratio DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "检查2025年第三季度核心业绩指标表中的营业总收入与利润表中的营业收入数值不一致的公司",
+    "output": "SELECT c.stock_abbr, c.stock_code, c.total_operating_revenue AS core_revenue, i.total_operating_revenue AS income_revenue, ABS(c.total_operating_revenue - i.total_operating_revenue) AS diff FROM core_performance_indicators_sheet c JOIN income_sheet i ON c.stock_abbr = i.stock_abbr AND c.report_period = i.report_period WHERE c.report_period = '2025Q3' AND ABS(c.total_operating_revenue - i.total_operating_revenue) > 0 ORDER BY diff DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "从资产负债表中提取片仔癀2022年全年的资产总额、负债总额、股东权益总额",
+    "output": "SELECT asset_total_assets, liability_total_liabilities, equity_total_equity FROM balance_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2022FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度同时满足净利润同比增长且扣非净利润同比增长的公司有哪些",
+    "output": "SELECT stock_abbr, stock_code, net_profit_yoy_growth, net_profit_excl_non_recurring_yoy FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_yoy_growth > 0 AND net_profit_excl_non_recurring_yoy > 0 ORDER BY net_profit_yoy_growth DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "关联核心业绩指标表与资产负债表，查询2025年第三季度ROE超过15%且资产负债率低于50%的公司",
+    "output": "SELECT c.stock_abbr, c.stock_code, c.roe, b.asset_liability_ratio FROM core_performance_indicators_sheet c JOIN balance_sheet b ON c.stock_abbr = b.stock_abbr AND c.report_period = b.report_period WHERE c.report_period = '2025Q3' AND c.roe > 15 AND b.asset_liability_ratio < 50 ORDER BY c.roe DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "统计2025年第三季度扣非净利润同比增长率超过100%的公司，并检查这些公司2024年同期净利润是否为正数",
+    "output": "SELECT c25.stock_abbr, c25.net_profit_excl_non_recurring AS excl_profit_2025q3, c25.net_profit_excl_non_recurring_yoy, c24.net_profit_10k_yuan AS net_profit_2024q3 FROM core_performance_indicators_sheet c25 LEFT JOIN core_performance_indicators_sheet c24 ON c25.stock_abbr = c24.stock_abbr AND c24.report_period = '2024Q3' WHERE c25.report_period = '2025Q3' AND c25.net_profit_excl_non_recurring_yoy > 100 ORDER BY c25.net_profit_excl_non_recurring_yoy DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算云南白药2025年第三季度营业总收入的环比增长率，展示2025年第二季度和第三季度的营业总收入及环比增长率",
+    "output": "SELECT a.report_period, a.total_operating_revenue, ROUND((a.total_operating_revenue - b.total_operating_revenue) / b.total_operating_revenue * 100, 2) AS qoq_growth FROM core_performance_indicators_sheet a JOIN core_performance_indicators_sheet b ON a.stock_abbr = b.stock_abbr WHERE a.stock_abbr = '云南白药' AND a.report_period = '2025Q3' AND b.report_period = '2025Q2';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "统计2025年第三季度各公司净利润同比增长率，计算其中同比增长率超过50%的公司的平均增长率",
+    "output": "SELECT AVG(net_profit_yoy_growth) AS avg_growth FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_yoy_growth > 50;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度各公司研发费用占营业总收入的比例，列出比例最高的5家",
+    "output": "SELECT stock_abbr, stock_code, operating_expense_rnd_expenses, total_operating_revenue, ROUND(operating_expense_rnd_expenses / total_operating_revenue * 100, 2) AS rnd_ratio FROM income_sheet WHERE report_period = '2025Q3' AND total_operating_revenue > 0 ORDER BY rnd_ratio DESC LIMIT 5;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算片仔癀2022年至2025年三季度的营业总收入复合增长率",
+    "output": "SELECT a.total_operating_revenue AS revenue_2022, b.total_operating_revenue AS revenue_2025q3, ROUND((POW(b.total_operating_revenue / a.total_operating_revenue, 1.0/3) - 1) * 100, 2) AS cagr FROM (SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2022FY') a, (SELECT total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '片仔癀' AND report_period = '2025Q3') b;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度66家公司的净利润中位数",
+    "output": "SELECT net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY net_profit_10k_yuan LIMIT 1 OFFSET (SELECT COUNT(*)/2 FROM core_performance_indicators_sheet WHERE report_period = '2025Q3');"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度各公司销售毛利率，列出高于行业均值的公司",
+    "output": "SELECT stock_abbr, stock_code, gross_profit_margin FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND gross_profit_margin > (SELECT AVG(gross_profit_margin) FROM core_performance_indicators_sheet WHERE report_period = '2025Q3') ORDER BY gross_profit_margin DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算云南白药2022年至2025年三季度的营业总收入复合增长率（CAGR），展示各年度数据",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '云南白药' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度，各公司经营性现金流净额与净利润的比值，列出比值在0.8到1.2之间的公司",
+    "output": "SELECT c.stock_abbr, c.stock_code, cf.operating_cf_net_amount, c.net_profit_10k_yuan, ROUND(cf.operating_cf_net_amount / c.net_profit_10k_yuan, 2) AS cf_ratio FROM core_performance_indicators_sheet c JOIN cash_flow_sheet cf ON c.stock_abbr = cf.stock_abbr AND c.report_period = cf.report_period WHERE c.report_period = '2025Q3' AND c.net_profit_10k_yuan > 0 AND cf.operating_cf_net_amount / c.net_profit_10k_yuan BETWEEN 0.8 AND 1.2 ORDER BY cf_ratio;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度中药行业的平均ROE、最大ROE和最小ROE",
+    "output": "SELECT ROUND(AVG(roe), 2) AS avg_roe, ROUND(MAX(roe), 2) AS max_roe, ROUND(MIN(roe), 2) AS min_roe FROM core_performance_indicators_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比白云山、云南白药、片仔癀2022年至2025年三季度的净利润，展示趋势",
+    "output": "SELECT stock_abbr, report_period, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE stock_abbr IN ('白云山','云南白药','片仔癀') AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY stock_abbr, report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比白云山2022年至2025年三季度的营业总收入同比增长率，展示各报告期增长率数据",
+    "output": "SELECT report_period, operating_revenue_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '白云山' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比云南白药和白云山2025年第三季度的资产负债率变化趋势",
+    "output": "SELECT stock_abbr, report_period, asset_liability_ratio FROM balance_sheet WHERE stock_abbr IN ('云南白药','白云山') AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY stock_abbr, report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "999与白云山相比，2024年年报收益率（ROE）最高的是哪家",
+    "output": "SELECT stock_abbr, roe FROM core_performance_indicators_sheet WHERE stock_abbr IN ('三金药业','白云山') AND report_period = '2024FY' ORDER BY roe DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比片仔癀、云南白药、华润三九2025年第三季度的核心盈利指标（销售毛利率、销售净利率、ROE）",
+    "output": "SELECT stock_abbr, gross_profit_margin, net_profit_margin, roe FROM core_performance_indicators_sheet WHERE stock_abbr IN ('片仔癀','云南白药','华润三九') AND report_period = '2025Q3' ORDER BY gross_profit_margin DESC;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比2024年和2025年三季度净利润同比增长率前十公司的名单变化",
+    "output": "SELECT '2024Q3' AS period, stock_abbr, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE report_period = '2024Q3' ORDER BY net_profit_yoy_growth DESC LIMIT 10 UNION ALL SELECT '2025Q3' AS period, stock_abbr, net_profit_yoy_growth FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY net_profit_yoy_growth DESC LIMIT 10;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "三九、白云山、云南白药、片仔癀2022年至2025年三季度营业总收入变化及各年同比增长率",
+    "output": "SELECT stock_abbr, report_period, total_operating_revenue, operating_revenue_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr IN ('三金药业','白云山','云南白药','片仔癀') AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY stock_abbr, report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度营业总收入排名前五的中药公司有哪些，这五家公司的净利润分别是多少",
+    "output": "SELECT stock_abbr, stock_code, total_operating_revenue, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC LIMIT 5;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀2025年第三季度利润总额是多少，同比增长还是下降了",
+    "output": "SELECT total_profit, net_profit_yoy_growth FROM income_sheet i JOIN core_performance_indicators_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '片仔癀' AND i.report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "云南白药2022年至2025年三季度的资产负债率变化趋势，这个趋势和白云山的同期对比有什么差异",
+    "output": "SELECT stock_abbr, report_period, asset_liability_ratio FROM balance_sheet WHERE stock_abbr IN ('云南白药','白云山') AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY stock_abbr, report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2024年研发费用是多少，销售费用是多少",
+    "output": "SELECT operating_expense_rnd_expenses, operating_expense_selling_expenses FROM income_sheet WHERE stock_abbr = '香雪制药' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度经营性现金流量净额为负的公司有多少家，这些公司中资产负债率超过60%的有几家",
+    "output": "SELECT COUNT(*) AS negative_cf_companies FROM cash_flow_sheet cf JOIN balance_sheet b ON cf.stock_abbr = b.stock_abbr AND cf.report_period = b.report_period WHERE cf.report_period = '2025Q3' AND cf.operating_cf_net_amount < 0 AND b.asset_liability_ratio > 60;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "找出2022年至2025年三季度连续四个年度报告期扣非净利润均超过1亿元的公司",
+    "output": "SELECT stock_abbr FROM core_performance_indicators_sheet WHERE report_period IN ('2022FY','2023FY','2024FY') AND net_profit_excl_non_recurring > 10000 GROUP BY stock_abbr HAVING COUNT(*) = 3;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2022年至2025年三季度连续四个报告期加权平均净资产收益率（扣非）均超过10%的公司",
+    "output": "SELECT stock_abbr FROM core_performance_indicators_sheet WHERE report_period IN ('2022FY','2023FY','2024FY','2025Q3') AND roe_weighted_excl_non_recurring > 10 GROUP BY stock_abbr HAVING COUNT(*) = 4;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "找出2022至2025年三季度连续四个报告期营业总收入持续增长的公司",
+    "output": "SELECT a.stock_abbr FROM core_performance_indicators_sheet a JOIN core_performance_indicators_sheet b ON a.stock_abbr = b.stock_abbr AND b.report_period = '2023FY' JOIN core_performance_indicators_sheet c ON a.stock_abbr = c.stock_abbr AND c.report_period = '2024FY' JOIN core_performance_indicators_sheet d ON a.stock_abbr = d.stock_abbr AND d.report_period = '2025Q3' WHERE a.report_period = '2022FY' AND b.total_operating_revenue > a.total_operating_revenue AND c.total_operating_revenue > b.total_operating_revenue AND d.total_operating_revenue > c.total_operating_revenue ORDER BY a.stock_abbr;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2022年财报至2025年三季度66家公司的营业总收入复合增长率，排名前三的公司",
+    "output": "SELECT a.stock_abbr, a.total_operating_revenue AS revenue_2022, b.total_operating_revenue AS revenue_2025, ROUND((POW(b.total_operating_revenue / a.total_operating_revenue, 1.0/3) - 1) * 100, 2) AS cagr FROM core_performance_indicators_sheet a JOIN core_performance_indicators_sheet b ON a.stock_abbr = b.stock_abbr AND b.report_period = '2025Q3' WHERE a.report_period = '2022FY' AND a.total_operating_revenue > 0 ORDER BY cagr DESC LIMIT 3;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "计算2025年第三季度66家公司资产负债率行业均值，验证计算结果是否符合负债总额/资产总额公式",
+    "output": "SELECT ROUND(AVG(liability_total_liabilities / asset_total_assets * 100), 2) AS calc_avg_ratio, ROUND(AVG(asset_liability_ratio), 2) AS stored_avg_ratio FROM balance_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "查询云南白药2025年第三季度的营业总收入，核心业绩指标表与利润表中该数值是否一致",
+    "output": "SELECT c.total_operating_revenue AS core_revenue, i.total_operating_revenue AS income_revenue, ABS(c.total_operating_revenue - i.total_operating_revenue) AS diff FROM core_performance_indicators_sheet c JOIN income_sheet i ON c.stock_abbr = i.stock_abbr AND c.report_period = i.report_period WHERE c.stock_abbr = '云南白药' AND c.report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "哪些企业是亏钱的，2025年第三季度核心利润指标为负的公司",
+    "output": "SELECT stock_abbr, stock_code, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' AND net_profit_10k_yuan < 0 ORDER BY net_profit_10k_yuan;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "中药公司的资产负债率情况如何，2025年三季度66家中药上市公司的资产负债率均值",
+    "output": "SELECT ROUND(AVG(asset_liability_ratio), 2) AS avg_ratio, ROUND(MAX(asset_liability_ratio), 2) AS max_ratio, ROUND(MIN(asset_liability_ratio), 2) AS min_ratio FROM balance_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度66家中药上市公司的平均销售毛利率、销售净利率分别是多少",
+    "output": "SELECT ROUND(AVG(gross_profit_margin), 2) AS avg_gross_margin, ROUND(AVG(net_profit_margin), 2) AS avg_net_margin FROM core_performance_indicators_sheet WHERE report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年的财务数据怎么样，2025年三季度66家中药上市公司的营业总收入、净利润均值与2024年同期相比增长率",
+    "output": "SELECT ROUND(AVG(c25.total_operating_revenue), 2) AS avg_rev_2025, ROUND(AVG(c24.total_operating_revenue), 2) AS avg_rev_2024, ROUND((AVG(c25.total_operating_revenue) - AVG(c24.total_operating_revenue)) / AVG(c24.total_operating_revenue) * 100, 2) AS rev_growth, ROUND(AVG(c25.net_profit_10k_yuan), 2) AS avg_profit_2025, ROUND(AVG(c24.net_profit_10k_yuan), 2) AS avg_profit_2024 FROM core_performance_indicators_sheet c25 JOIN core_performance_indicators_sheet c24 ON c25.stock_abbr = c24.stock_abbr AND c24.report_period = '2024Q3' WHERE c25.report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "2025年第三季度哪些公司业绩比较好，营业总收入和净利润均排名前十的公司",
+    "output": "SELECT stock_abbr, stock_code, total_operating_revenue, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC LIMIT 10;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "华润三九近三年的主营业务收入情况，绘制趋势图",
+    "output": "SELECT report_period, total_operating_revenue FROM core_performance_indicators_sheet WHERE stock_abbr = '华润三九' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "分析云南白药2022年至2025年三季度净利润的变化趋势，用折线图展示",
+    "output": "SELECT report_period, net_profit_10k_yuan FROM core_performance_indicators_sheet WHERE stock_abbr = '云南白药' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "查询2025年第三季度66家中药公司营业总收入排名前十的公司，用条形图展示",
+    "output": "SELECT stock_abbr, total_operating_revenue FROM core_performance_indicators_sheet WHERE report_period = '2025Q3' ORDER BY total_operating_revenue DESC LIMIT 10;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "统计2025年第三季度中药公司资产负债率的分布情况，按0-30%、30-50%、50-70%、70%以上分组",
+    "output": "SELECT CASE WHEN asset_liability_ratio < 30 THEN '0-30%' WHEN asset_liability_ratio < 50 THEN '30-50%' WHEN asset_liability_ratio < 70 THEN '50-70%' ELSE '70%以上' END AS ratio_group, COUNT(*) AS company_count FROM balance_sheet WHERE report_period = '2025Q3' GROUP BY ratio_group ORDER BY ratio_group;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "分析2022年至2025年三季度中药行业平均研发费用占比的变化趋势",
+    "output": "SELECT report_period, ROUND(AVG(operating_expense_rnd_expenses / total_operating_revenue * 100), 2) AS avg_rnd_ratio FROM income_sheet WHERE report_period IN ('2022FY','2023FY','2024FY','2025Q3') AND total_operating_revenue > 0 GROUP BY report_period ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "对比片仔癀、云南白药、白云山2025年三季度核心盈利指标，用雷达图展示",
+    "output": "SELECT stock_abbr, gross_profit_margin, net_profit_margin, roe FROM core_performance_indicators_sheet WHERE stock_abbr IN ('片仔癀','云南白药','白云山') AND report_period = '2025Q3';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "查询2025年第三季度经营性现金流与净利润的比值分布，用直方图展示",
+    "output": "SELECT c.stock_abbr, ROUND(cf.operating_cf_net_amount / c.net_profit_10k_yuan, 2) AS cf_profit_ratio FROM core_performance_indicators_sheet c JOIN cash_flow_sheet cf ON c.stock_abbr = cf.stock_abbr AND c.report_period = cf.report_period WHERE c.report_period = '2025Q3' AND c.net_profit_10k_yuan > 0 ORDER BY cf_profit_ratio;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "片仔癀近几年利润总额变化趋势及原因分析，先查历史数据",
+    "output": "SELECT report_period, total_profit, operating_revenue_yoy_growth FROM income_sheet i JOIN core_performance_indicators_sheet c ON i.stock_abbr = c.stock_abbr AND i.report_period = c.report_period WHERE i.stock_abbr = '片仔癀' AND i.report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY i.report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "香雪制药2024年净利润同比下降，结合营业成本和销售费用变化分析原因",
+    "output": "SELECT report_period, net_profit, total_profit, operating_expense_cost_of_sales, operating_expense_selling_expenses, total_operating_revenue FROM income_sheet WHERE stock_abbr = '香雪制药' AND report_period IN ('2023FY','2024FY') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "分析佐力药业2025年收入情况，查询收入变化数据",
+    "output": "SELECT report_period, total_operating_revenue, operating_revenue_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '佐力药业' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "千金药业2025年收入情况及近3年变化趋势",
+    "output": "SELECT report_period, total_operating_revenue, operating_revenue_yoy_growth FROM core_performance_indicators_sheet WHERE stock_abbr = '千金药业' AND report_period IN ('2022FY','2023FY','2024FY','2025Q3') ORDER BY report_period;"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "太极集团2024年研发费用和销售费用占销售收入的比例",
+    "output": "SELECT operating_expense_rnd_expenses, operating_expense_selling_expenses, total_operating_revenue, ROUND(operating_expense_rnd_expenses / total_operating_revenue * 100, 2) AS rnd_ratio, ROUND(operating_expense_selling_expenses / total_operating_revenue * 100, 2) AS sell_ratio FROM income_sheet WHERE stock_abbr = '太极集团' AND report_period = '2024FY';"
+  },
+  {
+    "instruction": "根据用户问题生成SQL查询语句",
+    "input": "以岭药业2024年至2025年三季度的销售毛利率变化",
+    "output": "SELECT report_period, gross_profit_margin FROM core_performance_indicators_sheet WHERE stock_abbr = '以岭药业' AND report_period IN ('2024Q1','2024Q2','2024Q3','2024FY','2025Q1','2025Q2','2025Q3') ORDER BY report_period;"
+  }
+]

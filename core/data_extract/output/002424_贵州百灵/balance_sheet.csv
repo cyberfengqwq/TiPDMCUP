@@ -1,0 +1,5 @@
+﻿serial_number,stock_code,stock_abbr,asset_cash_and_cash_equivalents,asset_accounts_receivable,asset_inventory,asset_trading_financial_assets,asset_construction_in_progress,asset_total_assets,asset_total_assets_yoy_growth,liability_accounts_payable,liability_advance_from_customers,liability_total_liabilities,liability_total_liabilities_yoy_growth,liability_contract_liabilities,liability_short_term_loans,asset_liability_ratio,equity_unappropriated_profit,equity_total_equity,report_period,report_year
+1,002424,贵州百灵,60502.2762,153408.4461,80482.6438,,,689439.8807,6.5,50327.6682,,289749.3904,,,,42.03,,399463.5639,2022FY,2022
+2,002424,贵州百灵,41793.85,173081.16,116368.32,,25807.2036,734908.13,6.59,74499.7691,,383672.47,19.54,9275.07,143601.76,52.26,115583.56,351235.66,2023FY,2023
+3,002424,贵州百灵,49565.6853,185269.9774,95419.3831,,,718629.84,4.23,70128.9962,,315607.1903,,9120.1114,156029.2821,43.92,229430.9288,401600.12,2023HY,2023
+4,002424,贵州百灵,49162.5071,139558.4301,87143.5318,,,686350.368125,-3.8,67788.6134,,358677.8549,,,,52.26,,325808.82521,2025HY,2025

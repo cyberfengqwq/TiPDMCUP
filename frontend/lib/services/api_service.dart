@@ -146,7 +146,15 @@ class ApiService {
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         try {
-          return jsonDecode(decodedBody) as Map<String, dynamic>;
+          final data = jsonDecode(decodedBody) as Map<String, dynamic>;
+          // 把 /result/xxx.jpg 拼成完整 URL
+          final rawImages = data['image'] as List<dynamic>? ?? [];
+          data['image'] = rawImages.map((p) {
+            final s = p.toString();
+            if (s.startsWith('/')) return '$baseUrl$s';
+            return s;
+          }).toList();
+          return data;
         } catch (_) {
           return {'content': decodedBody, 'image': [], 'references': []};
         }

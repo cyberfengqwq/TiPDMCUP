@@ -268,9 +268,10 @@ def chat(
         background_tasks.add_task(profile_service.sum_and_update_profile)
 
     a = result.get("A", {})
+    images = [f"/result/{Path(p).name}" for p in a.get("image", []) if p]
     return ChatResponse(
         content=a.get("content", ""),
-        image=a.get("image", []),
+        image=images,
         references=a.get("references", []),
     )
 

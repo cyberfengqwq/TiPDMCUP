@@ -1,0 +1,113 @@
+{
+  "doc_id": "桂林三金：2024年半年度报告摘要",
+  "stock_code": "002275",
+  "stock_abbr": "桂林三金",
+  "report_year": "2024",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 1068416486.86,
+      "value_raw": "1,068,416,486.86",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入（元）\n1,068,416,486.86\n1,194,164,221.75\n-10.53%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": 300972383.95,
+      "value_raw": "300,972,383.95",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润（元）\n300,972,383.95\n379,540,846.40\n-20.70%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": 274202045.76,
+      "value_raw": "274,202,045.76",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净\n274,202,045.76\n366,606,512.13\n-25.21%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": 203323264.12,
+      "value_raw": "203,323,264.12",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额（元）\n203,323,264.12\n189,745,271.10\n7.16%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": 0.51,
+      "value_raw": "0.51",
+      "unit": "元/股",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益（元/股）\n0.51\n0.65\n-21.54%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": 10.26,
+      "value_raw": "10.26%",
+      "unit": "%",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率\n10.26%\n13.54%\n-3.28%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 3808031326.26,
+      "value_raw": "3,808,031,326.26",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产（元）\n3,808,031,326.26\n3,936,044,324.47\n-3.25%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 2932718111.47,
+      "value_raw": "2,932,718,111.47",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净资产（元）\n2,932,718,111.47\n2,816,961,724.60\n4.11%"
+    }
+  ]
+}

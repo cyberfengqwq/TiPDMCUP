@@ -1,0 +1,113 @@
+{
+  "doc_id": "粤万年青：2023年半年度报告摘要",
+  "stock_code": "301111",
+  "stock_abbr": "粤万年青",
+  "report_year": "2023",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 146838141.02,
+      "value_raw": "146,838,141.02",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入（元）\n146,838,141.02\n134,095,511.08\n9.50%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_10k_yuan",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": 24805046.63,
+      "value_raw": "24,805,046.63",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润（元）\n24,805,046.63\n25,462,588.00\n-2.58%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净",
+      "value": 16953841.62,
+      "value_raw": "16,953,841.62",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净\n16,953,841.62\n15,374,644.30\n10.27%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": -13425326.13,
+      "value_raw": "-13,425,326.13",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额（元）\n-13,425,326.13\n22,983,043.12\n-158.41%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": 0.1547,
+      "value_raw": "0.1547",
+      "unit": "元/股",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益（元/股）\n0.1547\n0.1591\n-2.77%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": 3.22,
+      "value_raw": "3.22%",
+      "unit": "%",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率\n3.22%\n3.33%\n-0.11%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 842902788.68,
+      "value_raw": "842,902,788.68",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产（元）\n842,902,788.68\n857,063,372.44\n-1.65%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 767476217.63,
+      "value_raw": "767,476,217.63",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净资产（元）\n767,476,217.63\n758,671,171.00\n1.16%"
+    }
+  ]
+}

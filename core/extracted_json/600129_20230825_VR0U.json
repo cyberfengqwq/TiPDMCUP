@@ -1,0 +1,113 @@
+{
+  "doc_id": "600129_20230825_VR0U",
+  "stock_code": "600129",
+  "stock_abbr": "太极集团",
+  "report_year": 2023,
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业总收入",
+      "value": 9051351077.42,
+      "value_raw": "9,051,351,077.42",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入 9,051,351,077.42 7,249,949,840.22 7,185,249,050.36 24.85"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "net_profit",
+      "metric_alias": "净利润",
+      "value": 565345505.11,
+      "value_raw": "565,345,505.11",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润 565,345,505.11 127,831,965.94 124,080,750.09 342.26"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "扣非净利润",
+      "value": 571746500.04,
+      "value_raw": "571,746,500.04",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润 571,746,500.04 181,877,267.50 178,595,255.68 214.36"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营性现金流量净额",
+      "value": -428546424.5,
+      "value_raw": "-428,546,424.50",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额 -428,546,424.50 304,728,294.51 324,880,814.57 -240.63"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率(%)",
+      "value": 16.93,
+      "value_raw": "16.93",
+      "unit": "%",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率(%) 16.93 4.60 4.45 增加12.33个百分点"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "basic_eps",
+      "metric_alias": "基本每股收益(元/股)",
+      "value": 1.02,
+      "value_raw": "1.02",
+      "unit": "元/股",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益(元/股) 1.02 0.23 0.22 343.48"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "total_assets",
+      "metric_alias": "总资产",
+      "value": 14627497912.01,
+      "value_raw": "14,627,497,912.01",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产 14,627,497,912.01 14,896,326,064.64 14,707,197,661.95 -1.80"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 3621666053.47,
+      "value_raw": "3,621,666,053.47",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公 司股东的净资产 3,621,666,053.47 3,056,913,540.43 3,063,772,315.86 18.47"
+    }
+  ]
+}

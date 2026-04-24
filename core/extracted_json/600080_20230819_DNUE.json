@@ -1,0 +1,113 @@
+{
+  "doc_id": "600080_20230819_DNUE",
+  "stock_code": "600080",
+  "stock_abbr": "金花股份",
+  "report_year": "2023",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "balance_sheet",
+      "scope": "consolidated",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 1939197951.94,
+      "value_raw": "1,939,197,951.94",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "总资产 1,939,197,951.94 上年度末 1,974,418,631.97 本报告期末比上年度末增减(%) -1.78"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "consolidated",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 1686808310.12,
+      "value_raw": "1,686,808,310.12",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的净资产 1,686,808,310.12 上年度末 1,683,765,383.56 本报告期末比上年度末增减(%) 0.18"
+    },
+    {
+      "statement": "income_sheet",
+      "scope": "consolidated",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 255369543.71,
+      "value_raw": "255,369,543.71",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "营业收入 255,369,543.71 上年同期 258,719,332.77 本报告期比上年同期增减(%) -1.29"
+    },
+    {
+      "statement": "income_sheet",
+      "scope": "consolidated",
+      "metric_std": "net_profit",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": 3042638.0,
+      "value_raw": "3,042,638.00",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的净利润 3,042,638.00 上年同期 21,470,819.38 本报告期比上年同期增减(%) -85.83"
+    },
+    {
+      "statement": "income_sheet",
+      "scope": "consolidated",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": 17412222.02,
+      "value_raw": "17,412,222.02",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润 17,412,222.02 上年同期 20,091,671.31 本报告期比上年同期增减(%) -13.34"
+    },
+    {
+      "statement": "cash_flow_sheet",
+      "scope": "consolidated",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": -34391321.39,
+      "value_raw": "-34,391,321.39",
+      "unit": "元",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "经营活动产生的现金流量净额 -34,391,321.39 上年同期 24,253,247.16 本报告期比上年同期增减(%) 不适用"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率(%)",
+      "value": 0.18,
+      "value_raw": "0.18",
+      "unit": "%",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "加权平均净资产收益率(%) 0.18 上年同期 1.29 本报告期比上年同期增减(%) 减少1.11个百分点"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "consolidated",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益(元/股)",
+      "value": 0.0082,
+      "value_raw": "0.0082",
+      "unit": "元/股",
+      "time_role": "2023Q2",
+      "table_title": "2.2 主要财务数据",
+      "source_chunk": "chunk_2",
+      "source_text": "基本每股收益(元/股) 0.0082 上年同期 0.0575 本报告期比上年同期增减(%) -85.74"
+    }
+  ]
+}

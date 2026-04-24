@@ -1,0 +1,113 @@
+{
+  "doc_id": "佐力药业：2024年半年度报告摘要",
+  "stock_code": "300181",
+  "stock_abbr": "佐力药业",
+  "report_year": "2024",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 1428254689.36,
+      "value_raw": "1,428,254,689.36",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入（元）\n1,428,254,689.36\n1,011,458,568.59\n41.21%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_10k_yuan",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": 296054107.17,
+      "value_raw": "296,054,107.17",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润（元）\n296,054,107.17\n197,661,591.44\n49.78%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": 292102892.52,
+      "value_raw": "292,102,892.52",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润（元）\n292,102,892.52\n193,733,354.17\n50.78%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": 215347293.72,
+      "value_raw": "215,347,293.72",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额（元）\n215,347,293.72\n123,191,852.79\n74.81%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": 0.4221,
+      "value_raw": "0.4221",
+      "unit": "元/股",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益（元/股）\n0.4221\n0.2818\n49.79%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": 10.48,
+      "value_raw": "10.48%",
+      "unit": "%",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率\n10.48%\n7.14%\n3.34%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 3894078073.37,
+      "value_raw": "3,894,078,073.37",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产（元）\n3,894,078,073.37\n3,627,038,970.51\n7.36%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 2679447617.76,
+      "value_raw": "2,679,447,617.76",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净资产（元）\n2,679,447,617.76\n2,728,743,064.49\n-1.81%"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "doc_id": "新天药业：2025年半年度报告摘要",
+  "stock_code": "002873",
+  "stock_abbr": "新天药业",
+  "report_year": "2025",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 358286117.72,
+      "value_raw": "358,286,117.72",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入(元)\n358,286,117.72\n441,699,428.16\n-18.88%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_10k_yuan",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": 5766078.35,
+      "value_raw": "5,766,078.35",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润(元)\n5,766,078.35\n30,339,450.49\n-80.99%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": 3579494.68,
+      "value_raw": "3,579,494.68",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润(元)\n3,579,494.68\n29,512,961.52\n-87.87%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": 67187100.14,
+      "value_raw": "67,187,100.14",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额(元)\n67,187,100.14\n32,467,896.57\n106.93%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": 0.0236,
+      "value_raw": "0.0236",
+      "unit": "元/股",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益(元/股)\n0.0236\n0.1312\n-82.01%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": 0.48,
+      "value_raw": "0.48%",
+      "unit": "%",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率\n0.48%\n2.89%\n-2.41%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 1883979684.92,
+      "value_raw": "1,883,979,684.92",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产(元)\n1,883,979,684.92\n1,950,501,320.49\n-3.41%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 1186364059.49,
+      "value_raw": "1,186,364,059.49",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净资产(元)\n1,186,364,059.49\n1,194,715,847.70\n-0.70%"
+    }
+  ]
+}

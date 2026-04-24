@@ -1,0 +1,113 @@
+{
+  "doc_id": "香雪制药：2024年半年度报告摘要",
+  "stock_code": "300147",
+  "stock_abbr": "香雪制药",
+  "report_year": "2024",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 1096542829.5,
+      "value_raw": "1,096,542,829.50",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "营业收入(元): 1,096,542,829.50"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": -135221233.01,
+      "value_raw": "-135,221,233.01",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的净利润(元): -135,221,233.01"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": -108193322.14,
+      "value_raw": "-108,193,322.14",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润(元): -108,193,322.14"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": -6635060.3,
+      "value_raw": "-6,635,060.30",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "经营活动产生的现金流量净额(元): -6,635,060.30"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": -0.2,
+      "value_raw": "-0.2",
+      "unit": "元/股",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "基本每股收益(元/股): -0.2"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": -7.28,
+      "value_raw": "-7.28%",
+      "unit": "%",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "加权平均净资产收益率: -7.28%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 8116268284.39,
+      "value_raw": "8,116,268,284.39",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "总资产(元): 8,116,268,284.39"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 1789580036.42,
+      "value_raw": "1,789,580,036.42",
+      "unit": "元",
+      "time_role": "2024Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_2",
+      "source_text": "归属于上市公司股东的净资产(元): 1,789,580,036.42"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "doc_id": "粤万年青：2025年半年度报告摘要",
+  "stock_code": "301111",
+  "stock_abbr": "粤万年青",
+  "report_year": "2025",
+  "report_period": "半年度",
+  "facts": [
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "total_operating_revenue",
+      "metric_alias": "营业收入",
+      "value": 154780278.68,
+      "value_raw": "154,780,278.68",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "营业收入（元）\n154,780,278.68\n152,373,973.98\n1.58%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_10k_yuan",
+      "metric_alias": "归属于上市公司股东的净利润",
+      "value": -7224865.45,
+      "value_raw": "-7,224,865.45",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净利润（元）\n-7,224,865.45\n15,103,796.93\n-147.83%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "net_profit_excl_non_recurring",
+      "metric_alias": "归属于上市公司股东的扣除非经常性损益的净利润",
+      "value": -10742412.91,
+      "value_raw": "-10,742,412.91",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的扣除非经常性损益的净利润（元）\n-10,742,412.91\n8,557,768.74\n-225.53%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "operating_cf_net_amount",
+      "metric_alias": "经营活动产生的现金流量净额",
+      "value": -6025912.22,
+      "value_raw": "-6,025,912.22",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "经营活动产生的现金流量净额（元）\n-6,025,912.22\n-17,846,588.41\n66.23%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "eps",
+      "metric_alias": "基本每股收益",
+      "value": -0.0452,
+      "value_raw": "-0.0452",
+      "unit": "元/股",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "基本每股收益（元/股）\n-0.0452\n0.0944\n-147.88%"
+    },
+    {
+      "statement": "core_indicator",
+      "scope": "unknown",
+      "metric_std": "roe",
+      "metric_alias": "加权平均净资产收益率",
+      "value": -0.95,
+      "value_raw": "-0.95%",
+      "unit": "%",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "加权平均净资产收益率\n-0.95%\n1.93%\n-2.88%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "asset_total_assets",
+      "metric_alias": "总资产",
+      "value": 928645735.48,
+      "value_raw": "928,645,735.48",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "总资产（元）\n928,645,735.48\n933,166,569.41\n-0.48%"
+    },
+    {
+      "statement": "balance_sheet",
+      "scope": "unknown",
+      "metric_std": "equity_total_equity",
+      "metric_alias": "归属于上市公司股东的净资产",
+      "value": 749112363.26,
+      "value_raw": "749,112,363.26",
+      "unit": "元",
+      "time_role": "2025Q2",
+      "table_title": "主要会计数据和财务指标",
+      "source_chunk": "chunk_1",
+      "source_text": "归属于上市公司股东的净资产（元）\n749,112,363.26\n764,337,228.71\n-1.99%"
+    }
+  ]
+}

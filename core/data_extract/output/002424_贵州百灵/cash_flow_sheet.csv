@@ -1,0 +1,5 @@
+﻿serial_number,stock_code,stock_abbr,net_cash_flow,net_cash_flow_yoy_growth,operating_cf_net_amount,operating_cf_ratio_of_net_cf,operating_cf_cash_from_sales,investing_cf_net_amount,investing_cf_ratio_of_net_cf,investing_cf_cash_for_investments,investing_cf_cash_from_investment_recovery,financing_cf_cash_from_borrowing,financing_cf_cash_for_debt_repayment,financing_cf_net_amount,financing_cf_ratio_of_net_cf,report_period,report_year
+1,002424,贵州百灵,207312692.03,,50215.2213,-49230.8,354013.2273,-14033.299,13758.19,,,,,-36283.9219,35572.61,2022FY,2022
+2,002424,贵州百灵,12576.71,-74.95,12576.71,-101.53,12642.444,-3483.13,28.12,50.0,4700.0,163629.41,15067.7991,-21480.93,173.41,2023FY,2023
+3,002424,贵州百灵,-6429.65,122.37,12136.71,-188.76,1115838583.31,-7050.1556,109.65,4292530.0,114471926.6,879300000.0,834800000.0,-11516.2031,179.11,2023HY,2023
+4,002424,贵州百灵,146639589.93,921.03,24934.937736,242.77,0.0,-14663.959,-142.77,0.0,0.0,0.0,0.0,0.0,0.0,2025HY,2025
